@@ -38,6 +38,18 @@ function Login() {
     }
   };
 
+  const handleDemoLogin = () => {
+    login("demo-token", {
+      id: 1,
+      full_name: "Demo Police Officer",
+      username: "demo",
+      role: "Officer",
+      police_station: "Demo Police Station",
+    });
+
+    navigate("/dashboard");
+  };
+
   return (
     <div className="login-page">
       <div className="login-card">
@@ -77,6 +89,10 @@ function Login() {
 
           <button type="submit" disabled={loading}>
             {loading ? "Checking..." : t("signIn")}
+          </button>
+
+          <button type="button" onClick={handleDemoLogin}>
+            Demo Login
           </button>
         </form>
       </div>
