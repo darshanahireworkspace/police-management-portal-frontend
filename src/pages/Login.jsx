@@ -28,7 +28,6 @@ function Login() {
       });
 
       login(res.data.token, res.data.officer);
-
       toast.success("Login successful");
       navigate("/dashboard");
     } catch (error) {
@@ -36,18 +35,6 @@ function Login() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoLogin = () => {
-    login("demo-token", {
-      id: 1,
-      full_name: "Demo Police Officer",
-      username: "demo",
-      role: "Officer",
-      police_station: "Demo Police Station",
-    });
-
-    navigate("/dashboard");
   };
 
   return (
@@ -89,10 +76,6 @@ function Login() {
 
           <button type="submit" disabled={loading}>
             {loading ? "Checking..." : t("signIn")}
-          </button>
-
-          <button type="button" onClick={handleDemoLogin}>
-            Demo Login
           </button>
         </form>
       </div>
