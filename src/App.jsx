@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics";
 import Officers from "./pages/Officers";
 import Settings from "./pages/Settings";
 import PoliceStations from "./pages/PoliceStations";
+import OtherPlaces from "./pages/OtherPlaces";
 
 import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -44,6 +45,7 @@ function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/officers" element={<Officers />} />
         <Route path="/police-stations" element={<PoliceStations />} />
+        <Route path="/other-places" element={<OtherPlaces />} />
         <Route path="/settings" element={<Settings />} />
       </Route>
 

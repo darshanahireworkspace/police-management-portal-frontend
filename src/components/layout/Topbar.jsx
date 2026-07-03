@@ -1,5 +1,6 @@
 import { Menu, MapPin, Languages } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import policeLogo from "../../assets/police-logo.png";
 
 function Topbar({ setSidebarOpen }) {
   const { i18n } = useTranslation();
@@ -11,11 +12,29 @@ function Topbar({ setSidebarOpen }) {
       </button>
 
       <div className="topbar-title">
-        <span className="topbar-kicker">PCRFIMS</span>
-        <h1>Police Control</h1>
-        <div className="mobile-location-chip">
-          <MapPin size={12} />
-          <span>Live City Monitoring</span>
+        <img
+          src={policeLogo}
+          className="topbar-logo"
+          alt="Police Logo"
+        />
+
+        <div>
+          <span className="topbar-kicker">
+            Maharashtra Police
+          </span>
+
+          <h1>
+            छावणी पोलिस स्टेशन
+          </h1>
+
+          <p>
+            मालेगाव City
+          </p>
+
+          <div className="mobile-location-chip">
+            <MapPin size={12} />
+            <span>Live City Monitoring</span>
+          </div>
         </div>
       </div>
 

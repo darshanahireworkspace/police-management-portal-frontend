@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 
 import { getReligiousPlaces } from "../api/religiousPlaceApi";
 import { getFestivalPermissions } from "../api/festivalApi";
+import { getOtherPlaces } from "../api/otherPlaceApi";
 
 const riskColor = {
   Low: "#16a34a",
@@ -36,6 +37,22 @@ const createFestivalIcon = () =>
     iconAnchor: [17, 17],
   });
 
+const createOtherIcon = () =>
+  new L.DivIcon({
+    className: "custom-risk-marker",
+    html: `<div class="other-marker-square"></div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+
+const createUserLocationIcon = () =>
+  new L.DivIcon({
+    className: "user-location-marker",
+    html: `<div class="user-location-dot"><span></span></div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+  });
+
 function FlyToLocation({ position }) {
   const map = useMap();
 
@@ -54,19 +71,23 @@ function FlyToLocation({ position }) {
 function MapView() {
   const [places, setPlaces] = useState([]);
   const [festivals, setFestivals] = useState([]);
+  const [otherPlaces, setOtherPlaces] = useState([]);
   const [flyPosition, setFlyPosition] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   const [showPlaces, setShowPlaces] = useState(true);
   const [showFestivals, setShowFestivals] = useState(true);
+  const [showOther, setShowOther] = useState(true);
   const [riskFilter, setRiskFilter] = useState("All");
   const [mapMode, setMapMode] = useState("street");
   const [searchText, setSearchText] = useState("");
 
   const fetchMapData = async () => {
     try {
-      const [placeRes, festivalRes] = await Promise.all([
+      const [placeRes, festivalRes, otherRes] = await Promise.all([
         getReligiousPlaces(),
         getFestivalPermissions(),
+        getOtherPlaces(),
       ]);
 
       setPlaces(
@@ -76,6 +97,10 @@ function MapView() {
       setFestivals(
         (festivalRes.data.data || []).filter((f) => f.latitude && f.longitude)
       );
+
+      setOtherPlaces(
+        (otherRes.data.data || []).filter((o) => o.latitude && o.longitude)
+      );
     } catch {
       toast.error("Failed to load GIS data");
     }
@@ -83,6 +108,28 @@ function MapView() {
 
   useEffect(() => {
     fetchMapData();
+  }, []);
+
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const pos = [
+          position.coords.latitude,
+          position.coords.longitude,
+        ];
+
+        setUserLocation(pos);
+        setFlyPosition(pos);
+      },
+      () => toast.error("Please allow location permission"),
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
   }, []);
 
   const filteredPlaces = useMemo(() => {
@@ -112,6 +159,10 @@ function MapView() {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setFlyPosition([
+          position.coords.latitude,
+          position.coords.longitude,
+        ]);
+        setUserLocation([
           position.coords.latitude,
           position.coords.longitude,
         ]);
@@ -165,6 +216,15 @@ function MapView() {
               onChange={(e) => setShowFestivals(e.target.checked)}
             />
             Festival Mandals
+          </label>
+
+          <label className="layer-toggle">
+            <input
+              type="checkbox"
+              checked={showOther}
+              onChange={(e) => setShowOther(e.target.checked)}
+            />
+            Other City Data
           </label>
 
           <div className="gis-divider"></div>
@@ -237,6 +297,14 @@ function MapView() {
 
             <FlyToLocation position={flyPosition} />
 
+            {userLocation && (
+              <Marker position={userLocation} icon={createUserLocationIcon()}>
+                <Popup>
+                  <b>Your Live Location</b>
+                </Popup>
+              </Marker>
+            )}
+
             {showPlaces &&
               filteredPlaces.map((place) => (
                 <Marker
@@ -279,6 +347,25 @@ function MapView() {
                       <p><b>Mobile:</b> {festival.president_mobile || "-"}</p>
                       <p><b>Permission:</b> {festival.permission_status}</p>
                       <p><b>Miravnuk:</b> {festival.procession ? "Yes" : "No"}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+
+            {showOther &&
+              otherPlaces.map((item) => (
+                <Marker
+                  key={`other-${item.id}`}
+                  position={[Number(item.latitude), Number(item.longitude)]}
+                  icon={createOtherIcon()}
+                >
+                  <Popup>
+                    <div className="map-popup">
+                      <h3>{item.place_name}</h3>
+                      <p><b>Type:</b> Other City Data</p>
+                      <p><b>Category:</b> {item.category}</p>
+                      <p><b>Area:</b> {item.area || "-"}</p>
+                      <p><b>Mobile:</b> {item.mobile || "-"}</p>
                     </div>
                   </Popup>
                 </Marker>

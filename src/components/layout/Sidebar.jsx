@@ -1,6 +1,5 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import {
-  Shield,
   LayoutDashboard,
   Landmark,
   PlusCircle,
@@ -12,9 +11,11 @@ import {
   Settings,
   LogOut,
   Building2,
+  Store,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import useAuth from "../../hooks/useAuth";
+import policeLogo from "../../assets/police-logo.png";
 
 function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const { t } = useTranslation();
@@ -23,13 +24,12 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
   return (
     <aside className={`sidebar ${sidebarOpen ? "show-sidebar" : ""}`}>
-      <div className="brand">
-        <div className="brand-icon">
-          <Shield size={28} />
-        </div>
+      <div className="sidebar-brand">
+        <img src={policeLogo} alt="Police Logo" />
+
         <div>
-          <h2>{t("appName")}</h2>
-          <p>Police Command Center</p>
+          <h2>छावणी</h2>
+          <span>पोलिस स्टेशन मालेगा</span>
         </div>
       </div>
 
@@ -40,22 +40,44 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
         <p className="nav-label">Religious Places</p>
 
-        <NavLink to="/add-religious-place" onClick={() => setSidebarOpen(false)}>
+        <NavLink
+          to="/add-religious-place"
+          onClick={() => setSidebarOpen(false)}
+        >
           <PlusCircle size={19} /> {t("addReligiousPlace")}
         </NavLink>
 
-        <NavLink to="/religious-places" onClick={() => setSidebarOpen(false)}>
+        <NavLink
+          to="/religious-places"
+          onClick={() => setSidebarOpen(false)}
+        >
           <Landmark size={19} /> {t("religiousPlaces")}
         </NavLink>
 
         <p className="nav-label">Festival Permissions</p>
 
-        <NavLink to="/add-festival-permission" onClick={() => setSidebarOpen(false)}>
+        <NavLink
+          to="/add-festival-permission"
+          onClick={() => setSidebarOpen(false)}
+        >
           <PlusCircle size={19} /> {t("addFestivalPermission")}
         </NavLink>
 
-        <NavLink to="/festival-permissions" onClick={() => setSidebarOpen(false)}>
+        <NavLink
+          to="/festival-permissions"
+          onClick={() => setSidebarOpen(false)}
+        >
           <CalendarCheck size={19} /> {t("festivalPermissions")}
+        </NavLink>
+
+        <p className="nav-label">Other City Data</p>
+
+        <NavLink
+          to="/other-places"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <Store size={19} />
+          Other Places
         </NavLink>
 
         <p className="nav-label">Monitoring</p>

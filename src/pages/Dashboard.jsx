@@ -10,6 +10,7 @@ import {
   Search,
   X,
   ExternalLink,
+  Store,
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
@@ -17,6 +18,7 @@ import toast from "react-hot-toast";
 
 import { getDashboardStats } from "../api/dashboardApi";
 import { getPoliceStations } from "../api/policeStationApi";
+import { getOtherPlaces } from "../api/otherPlaceApi";
 import useAuth from "../hooks/useAuth";
 import VoiceField from "../components/common/VoiceField";
 
@@ -42,6 +44,14 @@ const createFestivalIcon = () =>
     iconAnchor: [17, 17],
   });
 
+const createUserLocationIcon = () =>
+  new L.DivIcon({
+    className: "user-location-marker",
+    html: `<div class="user-location-dot"><span></span></div>`,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+  });
+
 function Dashboard() {
   const { officer } = useAuth();
 
@@ -52,10 +62,12 @@ function Dashboard() {
   const [selectedStation, setSelectedStation] = useState("");
   const [dashboardSearch, setDashboardSearch] = useState("");
   const [selectedRecord, setSelectedRecord] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
 
   const [stats, setStats] = useState({});
   const [religiousPlaces, setReligiousPlaces] = useState([]);
   const [festivalPermissions, setFestivalPermissions] = useState([]);
+  const [otherPlaces, setOtherPlaces] = useState([]);
 
   const fetchDashboard = async (station = selectedStation) => {
     try {
@@ -65,6 +77,9 @@ function Dashboard() {
       setStats(res.data.stats || {});
       setReligiousPlaces(res.data.religiousPlaces || []);
       setFestivalPermissions(res.data.festivalPermissions || []);
+
+      const otherRes = await getOtherPlaces();
+      setOtherPlaces(otherRes.data.data || []);
     } catch {
       toast.error("Failed to load dashboard data");
     } finally {
@@ -86,12 +101,32 @@ function Dashboard() {
     fetchDashboard("");
   }, []);
 
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setUserLocation([
+          position.coords.latitude,
+          position.coords.longitude,
+        ]);
+      },
+      () => {},
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      }
+    );
+  }, []);
+
   const cards = [
     { key: "places", title: "Religious Places", value: stats.totalPlaces || 0, icon: <Landmark /> },
     { key: "temples", title: "Temples", value: stats.temples || 0, icon: <Church /> },
     { key: "masjids", title: "Masjids", value: stats.masjids || 0, icon: <Moon /> },
     { key: "dargahs", title: "Dargah", value: stats.dargahs || 0, icon: <MapPin /> },
     { key: "festivals", title: "Festival Permissions", value: stats.festivalPermissions || 0, icon: <CalendarCheck /> },
+    { key: "other", title: "Other City Data", value: otherPlaces.length || 0, icon: <Store /> },
     { key: "highRisk", title: "High Risk", value: stats.highRisk || 0, icon: <ShieldAlert /> },
   ];
 
@@ -108,6 +143,13 @@ function Dashboard() {
       recordType: "Festival Mandal",
       title: item.organizer_name,
       subtitle: `${item.festival_name || "-"} • ${item.area || "-"}`,
+    })),
+
+    ...otherPlaces.map((item) => ({
+      ...item,
+      recordType: "Other City Data",
+      title: item.place_name,
+      subtitle: `${item.category || "-"} • ${item.area || "-"}`,
     })),
   ].filter((item) => {
     const q = dashboardSearch.toLowerCase();
@@ -257,6 +299,14 @@ function Dashboard() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
+            {userLocation && (
+              <Marker position={userLocation} icon={createUserLocationIcon()}>
+                <Popup>
+                  <b>Your Live Location</b>
+                </Popup>
+              </Marker>
+            )}
+
             {religiousPlaces
               .filter((place) => place.latitude && place.longitude)
               .filter((place) => {
@@ -334,6 +384,8 @@ function Dashboard() {
           <h3>
             {selectedModule === "festivals"
               ? "Festival Permission Records"
+              : selectedModule === "other"
+              ? "Other City Data Records"
               : "Religious Place Records"}
           </h3>
 
@@ -353,6 +405,20 @@ function Dashboard() {
 
                   <span className="permission-status pending">
                     {item.permission_status}
+                  </span>
+                </div>
+              ))
+            )
+          ) : selectedModule === "other" ? (
+            otherPlaces.length === 0 ? (
+              <p>No other city data found.</p>
+            ) : (
+              otherPlaces.map((item) => (
+                <div className="event-row" key={item.id}>
+                  <span>
+                    <b>{item.place_name}</b>
+                    <br />
+                    <small>{item.category} • {item.area || "-"}</small>
                   </span>
                 </div>
               ))
@@ -438,7 +504,7 @@ function Dashboard() {
 
               <div>
                 <label>Type / Festival</label>
-                <b>{selectedRecord.place_type || selectedRecord.festival_name || "-"}</b>
+                <b>{selectedRecord.place_type || selectedRecord.festival_name || selectedRecord.category || "-"}</b>
               </div>
 
               <div>
