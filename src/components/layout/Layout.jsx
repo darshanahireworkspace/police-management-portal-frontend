@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
+import AIVoiceAssistant from "../common/AIVoiceAssistant";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,6 +24,9 @@ function Layout() {
         <div className="page-content">
           <Outlet />
         </div>
+
+        {/* AI Voice Assistant */}
+        <AIVoiceAssistant />
       </main>
     </div>
   );

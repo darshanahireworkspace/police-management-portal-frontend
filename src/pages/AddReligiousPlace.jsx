@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Building2,
   MapPin,
@@ -11,12 +11,18 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 
-import { createReligiousPlace } from "../api/religiousPlaceApi";
+import {
+  createReligiousPlace,
+  getSingleReligiousPlace,
+  updateReligiousPlace,
+} from "../api/religiousPlaceApi";
 import { getPoliceStations } from "../api/policeStationApi";
 import VoiceField from "../components/common/VoiceField";
 
 function AddReligiousPlace() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = Boolean(id);
 
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -52,8 +58,53 @@ function AddReligiousPlace() {
 
   useEffect(() => {
     loadPoliceStations();
-    detectCurrentLocation();
+
+    if (!isEditMode) {
+      detectCurrentLocation();
+    }
   }, []);
+
+  useEffect(() => {
+    const loadSinglePlace = async () => {
+      if (!id) return;
+
+      try {
+        const res = await getSingleReligiousPlace(id);
+        const data = res.data.data;
+
+        setForm({
+          place_name: data.place_name || "",
+          religion: data.religion || "Hindu",
+          place_type: data.place_type || "Temple",
+
+          address: data.address || "",
+          area: data.area || "",
+          taluka: data.taluka || "",
+          district: data.district || "",
+          state: data.state || "",
+          pincode: data.pincode || "",
+
+          latitude: data.latitude || "",
+          longitude: data.longitude || "",
+          google_map_link: data.google_map_link || "",
+
+          police_station: data.police_station || "",
+
+          contact_person: data.contact_person || "",
+          contact_mobile: data.contact_mobile || "",
+
+          regular_crowd: data.regular_crowd || "Low",
+          risk_level: data.risk_level || "Low",
+
+          sensitive_notes: data.sensitive_notes || "",
+        });
+      } catch {
+        toast.error("Failed to load record");
+      }
+    };
+
+    loadSinglePlace();
+  }, [id]);
 
   const loadPoliceStations = async () => {
     try {
@@ -169,9 +220,14 @@ function AddReligiousPlace() {
         formData.append("image", image);
       }
 
-      await createReligiousPlace(formData);
+      if (isEditMode) {
+        await updateReligiousPlace(id, form);
+        toast.success("Religious place updated successfully");
+      } else {
+        await createReligiousPlace(formData);
+        toast.success("Religious place saved successfully");
+      }
 
-      toast.success("Religious place saved successfully");
       navigate("/religious-places");
     } catch (error) {
       if (error.response?.status === 409) {
@@ -188,7 +244,9 @@ function AddReligiousPlace() {
     <div>
       <div className="page-header">
         <div>
-          <h2 className="page-title">Add Religious Place</h2>
+          <h2 className="page-title">
+            {isEditMode ? "Edit Religious Place" : "Add Religious Place"}
+          </h2>
           <p className="page-subtitle">
             Location will auto-detect and address details will auto-fill.
           </p>
@@ -431,7 +489,7 @@ function AddReligiousPlace() {
 
           <button type="submit" className="primary-btn" disabled={loading}>
             <Save size={18} />
-            {loading ? "Saving..." : "Save Record"}
+            {loading ? "Saving..." : isEditMode ? "Update Record" : "Save Record"}
           </button>
         </div>
       </form>

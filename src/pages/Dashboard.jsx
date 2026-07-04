@@ -394,7 +394,18 @@ function Dashboard() {
               <p>No festival permissions found.</p>
             ) : (
               festivalPermissions.map((item) => (
-                <div className="event-row" key={item.id}>
+  <div
+    className="event-row clickable-record"
+    key={item.id}
+    onClick={() =>
+      setSelectedRecord({
+        ...item,
+        recordType: "Festival Mandal",
+        title: item.organizer_name,
+        subtitle: `${item.festival_name || "-"} • ${item.area || "-"}`,
+      })
+    }
+  >
                   <span>
                     <b>{item.organizer_name}</b>
                     <br />
@@ -427,7 +438,18 @@ function Dashboard() {
             <p>No religious places found.</p>
           ) : (
             filteredPlaces.map((place) => (
-              <div className="event-row" key={place.id}>
+  <div
+    className="event-row clickable-record"
+    key={place.id}
+    onClick={() =>
+      setSelectedRecord({
+        ...place,
+        recordType: "Religious Place",
+        title: place.place_name,
+        subtitle: `${place.place_type || "-"} • ${place.area || "-"}`,
+      })
+    }
+  >
                 <span>
                   <b>{place.place_name}</b>
                   <br />

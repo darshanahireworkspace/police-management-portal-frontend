@@ -9,6 +9,7 @@ import {
 } from "../api/otherPlaceApi";
 
 import VoiceField from "../components/common/VoiceField";
+import { addToOfflineQueue } from "../services/offlineQueue";
 
 function OtherPlaces() {
   const [places, setPlaces] = useState([]);
@@ -141,6 +142,17 @@ function OtherPlaces() {
 
       loadPlaces();
     } catch {
+      if (!navigator.onLine) {
+        await addToOfflineQueue({
+          method: "POST",
+          url: "/other-places",
+          data: form,
+        });
+
+        toast.success("Saved offline. It will sync when internet returns.");
+        return;
+      }
+
       toast.error("Failed to save");
     }
   };

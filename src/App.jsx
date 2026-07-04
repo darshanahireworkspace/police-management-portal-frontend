@@ -30,16 +30,31 @@ function App() {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
+
         <Route path="/add-religious-place" element={<AddReligiousPlace />} />
+        <Route
+          path="/edit-religious-place/:id"
+          element={<AddReligiousPlace />}
+        />
+
         <Route path="/religious-places" element={<ReligiousPlaces />} />
+
         <Route
           path="/add-festival-permission"
           element={<AddFestivalPermission />}
         />
+
+        {/* New Edit Festival Route */}
+        <Route
+          path="/edit-festival-permission/:id"
+          element={<AddFestivalPermission />}
+        />
+
         <Route
           path="/festival-permissions"
           element={<FestivalPermissions />}
         />
+
         <Route path="/map-view" element={<MapView />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/analytics" element={<Analytics />} />

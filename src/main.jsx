@@ -7,6 +7,11 @@ import "./i18n";
 import "./index.css";
 import App from "./App";
 import { AuthProvider } from "./context/AuthContext";
+import { syncOfflineQueue } from "./services/offlineQueue";
+
+window.addEventListener("online", () => {
+  syncOfflineQueue();
+});
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>

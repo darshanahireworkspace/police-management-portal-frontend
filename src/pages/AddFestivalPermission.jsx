@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   CalendarCheck,
   Users,
@@ -14,11 +14,19 @@ import {
 import toast from "react-hot-toast";
 
 import { getReligiousPlaces } from "../api/religiousPlaceApi";
-import { createFestivalPermission } from "../api/festivalApi";
+import {
+  createFestivalPermission,
+  getSingleFestivalPermission,
+  updateFestivalPermission,
+} from "../api/festivalApi";
 import VoiceField from "../components/common/VoiceField";
+import { addToOfflineQueue } from "../services/offlineQueue";
 
 function AddFestivalPermission() {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const isEditMode = Boolean(id);
 
   const [places, setPlaces] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -57,8 +65,52 @@ function AddFestivalPermission() {
 
   useEffect(() => {
     fetchPlaces();
-    detectCurrentLocation();
+
+    if (!id) {
+      detectCurrentLocation();
+    }
   }, []);
+
+  useEffect(() => {
+    if (id) {
+      loadFestival();
+    }
+  }, [id]);
+
+  const loadFestival = async () => {
+    const res = await getSingleFestival(id);
+    const data = res.data.data;
+
+    setForm({
+      religious_place_id: data.religious_place_id || "",
+      festival_name: data.festival_name || "",
+      festival_year: data.festival_year || new Date().getFullYear(),
+      organizer_name: data.organizer_name || data.mandal_name || "",
+      president_name: data.president_name || "",
+      president_mobile: data.president_mobile || data.mobile || "",
+      permission_number: data.permission_number || "",
+      start_date: data.start_date || data.date || "",
+      end_date: data.end_date || "",
+      start_time: data.start_time || data.time || "",
+      end_time: data.end_time || "",
+      expected_crowd: data.expected_crowd || data.crowd || "",
+      sound_permission: data.sound_permission || "No",
+      procession: data.procession || "No",
+      route_details: data.route_details || "",
+      address: data.address || "",
+      area: data.area || "",
+      taluka: data.taluka || "",
+      district: data.district || "",
+      state: data.state || "",
+      pincode: data.pincode || "",
+      latitude: data.latitude || "",
+      longitude: data.longitude || "",
+      google_map_link: data.google_map_link || "",
+      verification_status: data.verification_status || "Pending",
+      permission_status: data.permission_status || "Pending",
+      police_notes: data.police_notes || data.notes || "",
+    });
+  };
 
   const fetchPlaces = async () => {
     try {
@@ -177,11 +229,30 @@ function AddFestivalPermission() {
         formData.append("photo", photo);
       }
 
-      await createFestivalPermission(formData);
+      if (isEditMode) {
+        await updateFestival(id, formData);
+        toast.success("Festival Updated");
+      } else {
+        await createFestival(formData);
+        toast.success("Festival Added");
+      }
 
-      toast.success("Festival permission saved successfully");
       navigate("/festival-permissions");
     } catch (error) {
+      if (!navigator.onLine) {
+        await addToOfflineQueue({
+          method: isEditMode ? "PUT" : "POST",
+          url: isEditMode
+            ? `/festival-permissions/${id}`
+            : "/festival-permissions",
+          data: Object.fromEntries(formData),
+        });
+
+        toast.success("Saved offline. It will sync when internet returns.");
+        navigate("/festival-permissions");
+        return;
+      }
+
       toast.error(error.response?.data?.message || "Failed to save permission");
     } finally {
       setLoading(false);
@@ -196,7 +267,11 @@ function AddFestivalPermission() {
     <div>
       <div className="page-header">
         <div>
-          <h2 className="page-title">Add Festival Permission</h2>
+          <h2 className="page-title">
+            {isEditMode
+              ? "Edit Festival Permission"
+              : "Add Festival Permission"}
+          </h2>
           <p className="page-subtitle">
             Temporary mandal / festival permission with live GPS verification.
           </p>
@@ -264,7 +339,11 @@ function AddFestivalPermission() {
 
             <div className="form-group">
               <label>Festival Name</label>
-              <select name="festival_name" value={form.festival_name} onChange={handleChange}>
+              <select
+                name="festival_name"
+                value={form.festival_name}
+                onChange={handleChange}
+              >
                 <option>Ganesh Utsav</option>
                 <option>Navratri</option>
                 <option>Jayanti</option>
@@ -330,37 +409,65 @@ function AddFestivalPermission() {
           <div className="form-grid">
             <div className="form-group full-width">
               <label>Full Address</label>
-              <VoiceField name="address" value={form.address} onChange={handleChange} />
+              <VoiceField
+                name="address"
+                value={form.address}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-group">
               <label>Area</label>
-              <VoiceField name="area" value={form.area} onChange={handleChange} />
+              <VoiceField
+                name="area"
+                value={form.area}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-group">
               <label>Taluka / City</label>
-              <VoiceField name="taluka" value={form.taluka} onChange={handleChange} />
+              <VoiceField
+                name="taluka"
+                value={form.taluka}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-group">
               <label>District</label>
-              <VoiceField name="district" value={form.district} onChange={handleChange} />
+              <VoiceField
+                name="district"
+                value={form.district}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-group">
               <label>Pincode</label>
-              <VoiceField name="pincode" value={form.pincode} onChange={handleChange} />
+              <VoiceField
+                name="pincode"
+                value={form.pincode}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-group">
               <label>Latitude</label>
-              <VoiceField name="latitude" value={form.latitude} onChange={handleChange} />
+              <VoiceField
+                name="latitude"
+                value={form.latitude}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-group">
               <label>Longitude</label>
-              <VoiceField name="longitude" value={form.longitude} onChange={handleChange} />
+              <VoiceField
+                name="longitude"
+                value={form.longitude}
+                onChange={handleChange}
+              />
             </div>
           </div>
         </section>
@@ -374,7 +481,11 @@ function AddFestivalPermission() {
           <div className="form-grid">
             <div className="form-group">
               <label>Sound Permission</label>
-              <select name="sound_permission" value={form.sound_permission} onChange={handleChange}>
+              <select
+                name="sound_permission"
+                value={form.sound_permission}
+                onChange={handleChange}
+              >
                 <option>No</option>
                 <option>Yes</option>
               </select>
@@ -382,7 +493,11 @@ function AddFestivalPermission() {
 
             <div className="form-group">
               <label>Miravnuk / Procession</label>
-              <select name="procession" value={form.procession} onChange={handleChange}>
+              <select
+                name="procession"
+                value={form.procession}
+                onChange={handleChange}
+              >
                 <option>No</option>
                 <option>Yes</option>
               </select>
@@ -467,13 +582,23 @@ function AddFestivalPermission() {
         </section>
 
         <div className="form-actions">
-          <button type="button" className="cancel-btn" onClick={() => navigate("/festival-permissions")}>
+          <button
+            type="button"
+            className="cancel-btn"
+            onClick={() => navigate("/festival-permissions")}
+          >
             Cancel
           </button>
 
           <button type="submit" className="primary-btn" disabled={loading}>
             <Save size={18} />
-            {loading ? "Saving..." : "Save Festival Permission"}
+            {loading
+              ? isEditMode
+                ? "Updating..."
+                : "Saving..."
+              : isEditMode
+              ? "Update Festival Permission"
+              : "Save Festival Permission"}
           </button>
         </div>
       </form>

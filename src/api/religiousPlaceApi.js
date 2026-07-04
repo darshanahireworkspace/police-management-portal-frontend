@@ -12,6 +12,10 @@ export const getReligiousPlaces = () => {
   return API.get("/religious-places");
 };
 
+export const getSingleReligiousPlace = (id) => {
+  return API.get(`/religious-places/${id}`);
+};
+
 export const deleteReligiousPlace = (id) => {
   return API.delete(`/religious-places/${id}`);
 };

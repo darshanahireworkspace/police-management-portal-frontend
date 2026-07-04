@@ -17,6 +17,8 @@ import {
   deletePoliceStation,
 } from "../api/policeStationApi";
 
+import { addToOfflineQueue } from "../services/offlineQueue";
+
 function PoliceStations() {
   const [stations, setStations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -82,6 +84,17 @@ function PoliceStations() {
 
       loadStations();
     } catch (error) {
+      if (!navigator.onLine) {
+        await addToOfflineQueue({
+          method: "POST",
+          url: "/police-stations",
+          data: form,
+        });
+
+        toast.success("Saved offline. It will sync when internet returns.");
+        return;
+      }
+
       toast.error(
         error.response?.data?.message || "Failed to add station"
       );

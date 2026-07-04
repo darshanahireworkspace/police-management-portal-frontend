@@ -111,6 +111,21 @@ function MapView() {
   }, []);
 
   useEffect(() => {
+    const command = localStorage.getItem("mapCommand");
+    const search = localStorage.getItem("mapSearch");
+
+    if (command === "highRisk") {
+      setRiskFilter("High");
+      localStorage.removeItem("mapCommand");
+    }
+
+    if (search) {
+      setSearchText(search);
+      localStorage.removeItem("mapSearch");
+    }
+  }, []);
+
+  useEffect(() => {
     if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
