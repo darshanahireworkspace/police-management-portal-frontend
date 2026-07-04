@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
+import policeLogo from "../assets/police-logo.png";
 import { loginOfficerApi } from "../api/authApi";
 import useAuth from "../hooks/useAuth";
 
@@ -28,6 +28,7 @@ function Login() {
       });
 
       login(res.data.token, res.data.officer);
+
       toast.success("Login successful");
       navigate("/dashboard");
     } catch (error) {
@@ -37,11 +38,23 @@ function Login() {
     }
   };
 
+  const handleDemoLogin = () => {
+    login("demo-token", {
+      id: 1,
+      full_name: "Demo Police Officer",
+      username: "demo",
+      role: "Officer",
+      police_station: "Demo Police Station",
+    });
+
+    navigate("/dashboard");
+  };
+
   return (
     <div className="login-page">
       <div className="login-card">
-        <div className="login-logo">
-          <Shield size={42} />
+        <div className="login-logo-img">
+          <img src={policeLogo} alt="Maharashtra Police" />
         </div>
 
         <h2>{t("officerLogin")}</h2>
@@ -74,8 +87,20 @@ function Login() {
             required
           />
 
-          <button type="submit" disabled={loading}>
+          <button
+            className="login-submit-btn"
+            type="submit"
+            disabled={loading}
+          >
             {loading ? "Checking..." : t("signIn")}
+          </button>
+
+          <button
+            className="demo-login-btn"
+            type="button"
+            onClick={handleDemoLogin}
+          >
+            Demo Login
           </button>
         </form>
       </div>
