@@ -4753,7 +4753,7 @@ font-size:9px;
   }
 
   .login-card::after {
-    content: "Demo mode is only for UI preview";
+    
     display: block;
     margin-top: 14px;
     font-size: 11px;
