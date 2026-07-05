@@ -13,7 +13,14 @@ function VoiceField({
 }) {
   const [listening, setListening] = useState(false);
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   const startVoice = () => {
+    if (isIOS) {
+      toast.error("iPhone वर browser voice typing supported नाही. Keyboard mic वापरा.");
+      return;
+    }
+
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -43,8 +50,19 @@ function VoiceField({
       setListening(false);
     };
 
-    recognition.onerror = () => {
-      toast.error("Voice typing failed");
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed") {
+        toast.error("Microphone permission blocked");
+      } else if (event.error === "no-speech") {
+        toast.error("No speech detected");
+      } else if (event.error === "audio-capture") {
+        toast.error("Microphone not found");
+      } else if (event.error === "network") {
+        toast.error("Voice typing requires internet connection");
+      } else {
+        toast.error("Voice typing failed");
+      }
+
       setListening(false);
     };
 

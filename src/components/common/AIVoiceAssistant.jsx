@@ -7,11 +7,10 @@ function AIVoiceAssistant() {
   const [listening, setListening] = useState(false);
   const navigate = useNavigate();
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
   const normalizeCommand = (text) => {
-    return text
-      .toLowerCase()
-      .replace(/[.,!?]/g, "")
-      .trim();
+    return text.toLowerCase().replace(/[.,!?]/g, "").trim();
   };
 
   const cleanSearchText = (command) => {
@@ -130,6 +129,11 @@ function AIVoiceAssistant() {
   };
 
   const startListening = () => {
+    if (isIOS) {
+      toast.error("iPhone वर voice assistant supported नाही. Keyboard mic वापरा.");
+      return;
+    }
+
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -153,8 +157,19 @@ function AIVoiceAssistant() {
       setListening(false);
     };
 
-    recognition.onerror = () => {
-      toast.error("Voice command failed. Please try again.");
+    recognition.onerror = (event) => {
+      if (event.error === "not-allowed") {
+        toast.error("Microphone permission blocked");
+      } else if (event.error === "no-speech") {
+        toast.error("No voice detected");
+      } else if (event.error === "audio-capture") {
+        toast.error("Microphone not found");
+      } else if (event.error === "network") {
+        toast.error("Voice assistant requires internet connection");
+      } else {
+        toast.error("Voice command failed. Please try again.");
+      }
+
       setListening(false);
     };
 
