@@ -5373,3 +5373,529 @@ border-radius:14px;
   background: #eff6ff !important;
   transform: translateY(-2px);
 }
+
+/* ===============================
+   FINAL PROFESSIONAL LOGIN UI
+================================ */
+
+.police-login-page {
+  min-height: 100vh !important;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(14, 165, 233, 0.22), transparent 28%),
+    radial-gradient(circle at 85% 80%, rgba(37, 99, 235, 0.18), transparent 28%),
+    linear-gradient(135deg, #061a40, #0b1f3a 55%, #020617) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 22px !important;
+}
+
+.police-login-card {
+  width: 100% !important;
+  max-width: 460px !important;
+  padding: 34px !important;
+  border-radius: 34px !important;
+  background: rgba(255, 255, 255, 0.97) !important;
+  box-shadow: 0 35px 90px rgba(0, 0, 0, 0.38) !important;
+  border: 1px solid rgba(255, 255, 255, 0.72) !important;
+  text-align: center !important;
+  position: relative !important;
+}
+
+.login-top-badge {
+  width: fit-content;
+  margin: 0 auto 16px;
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 8px 13px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.login-logo-img {
+  width: 104px !important;
+  height: 104px !important;
+  margin: 0 auto 18px !important;
+  background: white !important;
+  border-radius: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16) !important;
+  border: 1px solid #dbeafe !important;
+}
+
+.login-logo-img img {
+  width: 84px !important;
+  height: 84px !important;
+  object-fit: contain !important;
+}
+
+.police-login-card h2 {
+  font-size: 30px !important;
+  line-height: 1.15 !important;
+  margin: 0 0 8px !important;
+  color: #0f172a !important;
+  font-weight: 950 !important;
+}
+
+.police-login-card p {
+  color: #64748b !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  margin: 0 0 20px !important;
+}
+
+.login-language-box,
+.login-input-group {
+  width: 100%;
+  min-height: 54px;
+  background: #f8fafc;
+  border: 1px solid #dbe3ef;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 15px;
+}
+
+.login-language-box {
+  margin-bottom: 14px;
+  color: #0b3d91;
+}
+
+.login-language-box select {
+  flex: 1;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: #0f172a !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-input-group svg {
+  color: #0b3d91;
+  flex-shrink: 0;
+}
+
+.login-input-group input {
+  flex: 1;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  height: 52px !important;
+  padding: 0 !important;
+  font-size: 15px !important;
+  color: #0f172a !important;
+}
+
+.login-input-group:focus-within,
+.login-language-box:focus-within {
+  background: #ffffff;
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12);
+}
+
+.password-eye-btn {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0;
+}
+
+.login-submit-btn {
+  width: 100% !important;
+  height: 54px !important;
+  border: none !important;
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #0b3d91, #0ea5e9) !important;
+  color: white !important;
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+  margin-top: 2px !important;
+  box-shadow: 0 14px 30px rgba(14, 165, 233, 0.28) !important;
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed !important;
+}
+
+.login-footer-note {
+  margin-top: 16px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 650px) {
+  .police-login-page {
+    align-items: flex-start !important;
+    padding: 18px !important;
+    padding-top: 42px !important;
+  }
+
+  .police-login-card {
+    max-width: 390px !important;
+    padding: 24px 18px !important;
+    border-radius: 28px !important;
+  }
+
+  .login-top-badge {
+    font-size: 11px;
+    padding: 7px 11px;
+    margin-bottom: 14px;
+  }
+
+  .login-logo-img {
+    width: 86px !important;
+    height: 86px !important;
+    border-radius: 24px !important;
+  }
+
+  .login-logo-img img {
+    width: 70px !important;
+    height: 70px !important;
+  }
+
+  .police-login-card h2 {
+    font-size: 24px !important;
+  }
+
+  .police-login-card p {
+    font-size: 13px !important;
+    margin-bottom: 17px !important;
+  }
+
+  .login-language-box,
+  .login-input-group,
+  .login-submit-btn {
+    min-height: 50px !important;
+    height: 50px !important;
+    border-radius: 16px !important;
+  }
+
+  .login-input-group input,
+  .login-language-box select {
+    font-size: 14px !important;
+  }
+}
+.police-login-card{
+    width:100%;
+    max-width:430px;
+    padding:38px 34px;
+    border-radius:30px;
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(20px);
+    border:1px solid rgba(255,255,255,.7);
+    box-shadow:
+        0 30px 80px rgba(15,23,42,.18),
+        0 10px 25px rgba(0,0,0,.08);
+    text-align:center;
+}
+
+.login-logo-img{
+    width:105px;
+    height:105px;
+    margin:18px auto;
+    background:#fff;
+    border-radius:28px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border:1px solid #e2e8f0;
+    box-shadow:
+        0 20px 45px rgba(37,99,235,.15);
+}
+
+.login-logo-img img{
+    width:72px;
+    height:72px;
+    object-fit:contain;
+}
+
+
+/* ===============================
+   LOGIN PAGE CLEAN FINAL OVERRIDE
+   paste at END of index.css
+================================ */
+
+.login-page.police-login-page {
+  min-height: 100vh !important;
+  width: 100% !important;
+  padding: 24px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background:
+    radial-gradient(circle at top left, rgba(14, 165, 233, 0.18), transparent 32%),
+    linear-gradient(135deg, #061a40 0%, #082653 45%, #020617 100%) !important;
+}
+
+.login-card.police-login-card {
+  width: 100% !important;
+  max-width: 420px !important;
+  padding: 30px 28px !important;
+  border-radius: 30px !important;
+  background: #ffffff !important;
+  text-align: center !important;
+  box-shadow: 0 32px 80px rgba(2, 6, 23, 0.38) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+}
+
+.login-top-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 7px 13px !important;
+  margin: 0 auto 16px !important;
+  border-radius: 999px !important;
+  background: #e0f2fe !important;
+  color: #0369a1 !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.login-logo-img {
+  width: 92px !important;
+  height: 92px !important;
+  margin: 0 auto 18px !important;
+  border-radius: 24px !important;
+  background: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 1px solid #dbeafe !important;
+  box-shadow: 0 16px 36px rgba(37, 99, 235, 0.14) !important;
+}
+
+.login-logo-img img {
+  width: 72px !important;
+  height: 72px !important;
+  object-fit: contain !important;
+}
+
+.login-card.police-login-card h2 {
+  font-size: 28px !important;
+  line-height: 1.15 !important;
+  margin: 0 0 8px !important;
+  color: #0f172a !important;
+  font-weight: 950 !important;
+}
+
+.login-card.police-login-card p {
+  margin: 0 0 20px !important;
+  color: #64748b !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+
+.login-form {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 13px !important;
+}
+
+/* Language + input same size */
+.login-language-box,
+.login-input-group {
+  width: 100% !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  padding: 0 14px !important;
+  border-radius: 17px !important;
+  background: #f8fafc !important;
+  border: 1px solid #dbe3ef !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+.login-language-box {
+  margin: 0 0 13px !important;
+}
+
+.login-language-box svg,
+.login-input-group > svg {
+  width: 18px !important;
+  height: 18px !important;
+  color: #0b3d91 !important;
+  flex: 0 0 18px !important;
+}
+
+/* Remove global input styling inside login */
+.login-card.police-login-card input,
+.login-card.police-login-card select,
+.login-input-group input,
+.login-language-box select {
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 !important;
+  width: 100% !important;
+
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+
+  padding: 0 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+
+  color: #0f172a !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+}
+
+.login-card.police-login-card input:-webkit-autofill,
+.login-card.police-login-card input:-webkit-autofill:hover,
+.login-card.police-login-card input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #f8fafc inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+}
+
+/* Focus */
+.login-language-box:focus-within,
+.login-input-group:focus-within {
+  background: #ffffff !important;
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.12) !important;
+}
+
+/* Password eye proper alignment */
+.password-eye-btn {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: #64748b !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+}
+
+.password-eye-btn svg {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.password-eye-btn:hover {
+  background: #e0f2fe !important;
+  color: #0b3d91 !important;
+}
+
+.login-submit-btn {
+  width: 100% !important;
+  height: 54px !important;
+  min-height: 54px !important;
+  margin: 4px 0 0 !important;
+  padding: 0 !important;
+
+  border: none !important;
+  border-radius: 17px !important;
+  background: linear-gradient(135deg, #0b3d91, #0ea5e9) !important;
+  color: #ffffff !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  font-size: 15px !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+  box-shadow: 0 14px 30px rgba(14, 165, 233, 0.28) !important;
+}
+
+.login-submit-btn:hover {
+  transform: translateY(-1px) !important;
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+}
+
+.login-footer-note {
+  margin-top: 16px !important;
+  color: #64748b !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
+
+/* Mobile */
+@media (max-width: 650px) {
+  .login-page.police-login-page {
+    padding: 18px !important;
+    align-items: flex-start !important;
+    padding-top: 44px !important;
+  }
+
+  .login-card.police-login-card {
+    max-width: 100% !important;
+    padding: 24px 18px !important;
+    border-radius: 26px !important;
+  }
+
+  .login-logo-img {
+    width: 82px !important;
+    height: 82px !important;
+    border-radius: 22px !important;
+  }
+
+  .login-logo-img img {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  .login-card.police-login-card h2 {
+    font-size: 23px !important;
+  }
+
+  .login-card.police-login-card p {
+    font-size: 13px !important;
+    margin-bottom: 17px !important;
+  }
+
+  .login-language-box,
+  .login-input-group,
+  .login-submit-btn {
+    height: 50px !important;
+    min-height: 50px !important;
+    border-radius: 15px !important;
+  }
+
+  .login-card.police-login-card input,
+  .login-card.police-login-card select {
+    font-size: 14px !important;
+  }
+
+  .password-eye-btn {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+  }
+}
