@@ -6852,3 +6852,30 @@ opacity:.3;
 .install-app-btn:hover {
   background: #dbeafe;
 }
+
+.offline-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #071b3b, #020617);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.offline-page svg {
+  color: #38bdf8;
+  margin-bottom: 18px;
+}
+
+.offline-page h2 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.offline-page p {
+  color: #cbd5e1;
+  max-width: 360px;
+}

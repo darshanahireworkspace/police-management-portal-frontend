@@ -11,9 +11,10 @@ export default defineConfig({
 
       manifest: {
         id: "/",
-        name: "Chhavani Police Station Malegaon",
+
+        name: "Chhavani Police Station",
         short_name: "Chhavani Police",
-        description: "Police City Religious and Festival Management System",
+        description: "Police City Management System",
 
         start_url: "/",
         scope: "/",

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import SplashScreen from "./components/SplashScreen";
+import OfflinePage from "./components/OfflinePage";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -22,6 +23,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
   const [loading, setLoading] = useState(true);
+  const [online, setOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,6 +32,23 @@ function App() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    const goOnline = () => setOnline(true);
+    const goOffline = () => setOnline(false);
+
+    window.addEventListener("online", goOnline);
+    window.addEventListener("offline", goOffline);
+
+    return () => {
+      window.removeEventListener("online", goOnline);
+      window.removeEventListener("offline", goOffline);
+    };
+  }, []);
+
+  if (!online) {
+    return <OfflinePage />;
+  }
 
   if (loading) {
     return <SplashScreen />;
