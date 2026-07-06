@@ -6629,3 +6629,13 @@ transform:translateY(-24px);
     }
   }
 }
+@media (max-width: 768px) {
+  body:has(.sidebar.show-sidebar) .mobile-bottom-nav,
+  body:has(.sidebar.open) .mobile-bottom-nav,
+  body:has(.sidebar.active) .mobile-bottom-nav,
+  body:has(.mobile-overlay) .mobile-bottom-nav {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(120px) !important;
+  }
+}
