@@ -1,4 +1,7 @@
+import { useEffect, useState } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
+import SplashScreen from "./components/SplashScreen";
 
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -18,6 +21,20 @@ import Layout from "./components/layout/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <SplashScreen />;
+  }
+
   return (
     <Routes>
       <Route path="/" element={<Login />} />
@@ -44,7 +61,6 @@ function App() {
           element={<AddFestivalPermission />}
         />
 
-        {/* New Edit Festival Route */}
         <Route
           path="/edit-festival-permission/:id"
           element={<AddFestivalPermission />}
@@ -62,10 +78,7 @@ function App() {
         <Route path="/police-stations" element={<PoliceStations />} />
 
         <Route path="/other-places" element={<OtherPlaces />} />
-        <Route
-          path="/edit-other-place/:id"
-          element={<OtherPlaces />}
-        />
+        <Route path="/edit-other-place/:id" element={<OtherPlaces />} />
 
         <Route path="/settings" element={<Settings />} />
       </Route>

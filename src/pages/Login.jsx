@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Lock, User, Languages, ShieldCheck } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Lock,
+  User,
+  Languages,
+  ShieldCheck,
+  Download,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 
@@ -17,6 +25,50 @@ function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const installed =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true;
+
+    setIsInstalled(installed);
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+    };
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (!installPrompt) {
+      toast.error(
+        "Install option not available. Chrome menu मधून Add to Home Screen करा."
+      );
+      return;
+    }
+
+    installPrompt.prompt();
+
+    const choice = await installPrompt.userChoice;
+
+    if (choice.outcome === "accepted") {
+      toast.success("App installed successfully");
+      setInstallPrompt(null);
+      setIsInstalled(true);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -97,6 +149,17 @@ function Login() {
           <button className="login-submit-btn" type="submit" disabled={loading}>
             {loading ? "Verifying Officer..." : t("signIn")}
           </button>
+
+          {!isInstalled && (
+            <button
+              type="button"
+              className="install-app-btn"
+              onClick={handleInstallApp}
+            >
+              <Download size={18} />
+              Install App
+            </button>
+          )}
         </form>
 
         <div className="login-footer-note">

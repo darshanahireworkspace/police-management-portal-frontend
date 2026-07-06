@@ -6639,3 +6639,216 @@ transform:translateY(-24px);
     transform: translateY(120px) !important;
   }
 }
+
+/* ==========================
+      SPLASH SCREEN
+========================== */
+
+.splash-screen{
+
+position:fixed;
+
+inset:0;
+
+display:flex;
+
+flex-direction:column;
+
+justify-content:center;
+
+align-items:center;
+
+background:
+radial-gradient(circle at top,#0ea5e9 0%,transparent 30%),
+linear-gradient(135deg,#04152f,#0b3d91,#04152f);
+
+z-index:999999;
+
+overflow:hidden;
+
+}
+
+.splash-logo{
+
+width:130px;
+
+height:130px;
+
+padding:18px;
+
+border-radius:30px;
+
+background:white;
+
+box-shadow:
+0 20px 60px rgba(0,0,0,.35);
+
+}
+
+.splash-title{
+
+margin-top:30px;
+
+font-size:38px;
+
+font-weight:900;
+
+letter-spacing:1px;
+
+color:white;
+
+text-align:center;
+
+}
+
+.splash-subtitle{
+
+margin-top:10px;
+
+font-size:18px;
+
+font-weight:600;
+
+color:#dbeafe;
+
+}
+
+.loading-line{
+
+margin-top:45px;
+
+height:7px;
+
+background:white;
+
+border-radius:100px;
+
+}
+
+.loading-text{
+
+margin-top:22px;
+
+color:white;
+
+font-weight:700;
+
+letter-spacing:.5px;
+
+font-size:15px;
+
+opacity:.9;
+
+}
+
+@media(max-width:768px){
+
+.splash-logo{
+
+width:105px;
+
+height:105px;
+
+padding:15px;
+
+}
+
+.splash-title{
+
+font-size:28px;
+
+padding:0 18px;
+
+}
+
+.splash-subtitle{
+
+font-size:15px;
+
+text-align:center;
+
+padding:0 18px;
+
+}
+
+.loading-line{
+
+width:150px !important;
+
+}
+
+.loading-text{
+
+font-size:13px;
+
+}
+
+}
+
+.splash-screen::before{
+
+content:"";
+
+position:absolute;
+
+width:420px;
+
+height:420px;
+
+background:rgba(59,130,246,.18);
+
+border-radius:50%;
+
+filter:blur(60px);
+
+animation:beacon 3s infinite;
+
+}
+
+@keyframes beacon{
+
+0%{
+
+transform:scale(.7);
+
+opacity:.3;
+
+}
+
+50%{
+
+transform:scale(1.2);
+
+opacity:.9;
+
+}
+
+100%{
+
+transform:scale(.7);
+
+opacity:.3;
+
+}
+
+}
+
+.install-app-btn {
+  width: 100%;
+  height: 50px;
+  margin-top: 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 17px;
+  background: #eff6ff;
+  color: #0b3d91;
+  font-weight: 950;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  cursor: pointer;
+}
+
+.install-app-btn:hover {
+  background: #dbeafe;
+}
