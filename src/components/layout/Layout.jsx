@@ -3,6 +3,7 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import AIVoiceAssistant from "../common/AIVoiceAssistant";
+import MobileBottomNav from "./MobileBottomNav";
 
 function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -27,6 +28,9 @@ function Layout() {
 
         {/* AI Voice Assistant */}
         <AIVoiceAssistant />
+
+        {/* Mobile Bottom Navigation */}
+        <MobileBottomNav />
       </main>
     </div>
   );
