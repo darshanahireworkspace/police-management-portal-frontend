@@ -60,7 +60,13 @@ function App() {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/officers" element={<Officers />} />
         <Route path="/police-stations" element={<PoliceStations />} />
+
         <Route path="/other-places" element={<OtherPlaces />} />
+        <Route
+          path="/edit-other-place/:id"
+          element={<OtherPlaces />}
+        />
+
         <Route path="/settings" element={<Settings />} />
       </Route>
 

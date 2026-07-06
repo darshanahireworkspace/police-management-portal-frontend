@@ -44,6 +44,14 @@ const createFestivalIcon = () =>
     iconAnchor: [17, 17],
   });
 
+const createOtherIcon = () =>
+  new L.DivIcon({
+    className: "custom-risk-marker",
+    html: `<div class="other-marker-square"></div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+  });
+
 const createUserLocationIcon = () =>
   new L.DivIcon({
     className: "user-location-marker",
@@ -126,7 +134,7 @@ function Dashboard() {
     { key: "masjids", title: "Masjids", value: stats.masjids || 0, icon: <Moon /> },
     { key: "dargahs", title: "Dargah", value: stats.dargahs || 0, icon: <MapPin /> },
     { key: "festivals", title: "Festival Permissions", value: stats.festivalPermissions || 0, icon: <CalendarCheck /> },
-    { key: "other", title: "Other City Data", value: otherPlaces.length || 0, icon: <Store /> },
+    { key: "other", title: "Other City Data", value: otherPlaces.length, icon: <Store size={20} /> },
     { key: "highRisk", title: "High Risk", value: stats.highRisk || 0, icon: <ShieldAlert /> },
   ];
 
@@ -375,6 +383,26 @@ function Dashboard() {
                     </Popup>
                   </Marker>
                 ))}
+
+            {otherPlaces
+              .filter((item) => item.latitude && item.longitude)
+              .map((item) => (
+                <Marker
+                  key={`other-map-${item.id}`}
+                  position={[Number(item.latitude), Number(item.longitude)]}
+                  icon={createOtherIcon()}
+                >
+                  <Popup>
+                    <div className="map-popup">
+                      <h3>{item.place_name}</h3>
+                      <p><b>Type:</b> Other City Data</p>
+                      <p><b>Category:</b> {item.category}</p>
+                      <p><b>Area:</b> {item.area || "-"}</p>
+                      <p><b>Mobile:</b> {item.mobile || "-"}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
           </MapContainer>
         </div>
       </div>
@@ -422,10 +450,21 @@ function Dashboard() {
             )
           ) : selectedModule === "other" ? (
             otherPlaces.length === 0 ? (
-              <p>No other city data found.</p>
+              <p>No other city records found.</p>
             ) : (
               otherPlaces.map((item) => (
-                <div className="event-row" key={item.id}>
+                <div
+                  className="event-row clickable-record"
+                  key={`other-${item.id}`}
+                  onClick={() =>
+                    setSelectedRecord({
+                      ...item,
+                      recordType: "Other City Data",
+                      title: item.place_name,
+                      subtitle: `${item.category || "-"} • ${item.area || "-"}`,
+                    })
+                  }
+                >
                   <span>
                     <b>{item.place_name}</b>
                     <br />
