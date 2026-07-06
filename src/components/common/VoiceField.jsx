@@ -1,5 +1,5 @@
 import { Mic, MicOff } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 function VoiceField({
@@ -12,8 +12,17 @@ function VoiceField({
   lang = "mr-IN",
 }) {
   const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
+  const finalTextRef = useRef("");
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  const stopVoice = () => {
+    try {
+      recognitionRef.current?.stop();
+    } catch {}
+    setListening(false);
+  };
 
   const startVoice = () => {
     if (isIOS) {
@@ -21,56 +30,94 @@ function VoiceField({
       return;
     }
 
+    if (!window.isSecureContext) {
+      toast.error("Voice typing HTTPS वरच नीट काम करते.");
+      return;
+    }
+
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      toast.error("Voice typing not supported in this browser");
+      toast.error("This browser does not support voice typing");
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.lang = lang;
-    recognition.interimResults = false;
-    recognition.continuous = false;
+    if (listening) {
+      stopVoice();
+      return;
+    }
 
-    recognition.start();
-    setListening(true);
+    try {
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      finalTextRef.current = "";
 
-    recognition.onresult = (event) => {
-      const text = event.results[0][0].transcript;
+      recognition.lang = lang;
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
 
-      onChange({
-        target: {
-          name,
-          value: value ? value + " " + text : text,
-        },
-      });
+      recognition.onstart = () => {
+        setListening(true);
+        toast.success("Listening...");
+      };
 
+      recognition.onresult = (event) => {
+        let transcript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+
+        finalTextRef.current = transcript.trim();
+      };
+
+      recognition.onerror = (event) => {
+        const error = event.error;
+
+        if (error === "not-allowed" || error === "service-not-allowed") {
+          toast.error("Microphone permission blocked");
+        } else if (error === "no-speech") {
+          toast.error("Speech ऐकू आली नाही. पुन्हा बोला.");
+        } else if (error === "audio-capture") {
+          toast.error("Microphone not found");
+        } else if (error === "network") {
+          toast.error("Voice typing साठी internet required आहे");
+        } else if (error === "aborted") {
+          // ignore user stop
+        } else {
+          toast.error("Voice typing failed. Try again.");
+        }
+
+        setListening(false);
+      };
+
+      recognition.onend = () => {
+        const spokenText = finalTextRef.current;
+
+        if (spokenText) {
+          onChange({
+            target: {
+              name,
+              value: value ? `${value} ${spokenText}` : spokenText,
+            },
+          });
+        }
+
+        setListening(false);
+        recognitionRef.current = null;
+      };
+
+      recognition.start();
+    } catch {
+      toast.error("Voice typing already running. Try again.");
       setListening(false);
-    };
-
-    recognition.onerror = (event) => {
-      if (event.error === "not-allowed") {
-        toast.error("Microphone permission blocked");
-      } else if (event.error === "no-speech") {
-        toast.error("No speech detected");
-      } else if (event.error === "audio-capture") {
-        toast.error("Microphone not found");
-      } else if (event.error === "network") {
-        toast.error("Voice typing requires internet connection");
-      } else {
-        toast.error("Voice typing failed");
-      }
-
-      setListening(false);
-    };
-
-    recognition.onend = () => setListening(false);
+    }
   };
 
   return (
-    <div className="voice-field">
+    <div className={`voice-field ${listening ? "voice-active" : ""}`}>
       {textarea ? (
         <textarea
           name={name}

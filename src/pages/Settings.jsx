@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Settings as SettingsIcon,
   User,
@@ -12,34 +12,78 @@ import {
   Save,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 import useAuth from "../hooks/useAuth";
+
+const DEFAULT_SETTINGS = {
+  systemName: "Police City Religious & Festival Intelligence Management System",
+  cityName: "Malegaon",
+  district: "Nashik",
+  state: "Maharashtra",
+  defaultLanguage: "mr",
+  themeMode: "light",
+  enableNotifications: "Yes",
+  enableGpsTracking: "Yes",
+  enableDuplicateCheck: "Yes",
+  enableAuditLogs: "Yes",
+  autoLogout: "30",
+};
 
 function Settings() {
   const { officer } = useAuth();
+  const { i18n } = useTranslation();
 
-  const [settings, setSettings] = useState({
-    systemName: "Police City Religious & Festival Intelligence Management System",
-    cityName: "Malegaon",
-    district: "Nashik",
-    state: "Maharashtra",
-    defaultLanguage: "Marathi",
-    themeMode: "Light",
-    enableNotifications: "Yes",
-    enableGpsTracking: "Yes",
-    enableDuplicateCheck: "Yes",
-    enableAuditLogs: "Yes",
-    autoLogout: "30",
+  const [settings, setSettings] = useState(() => {
+    const saved = localStorage.getItem("policeAppSettings");
+    return saved ? JSON.parse(saved) : DEFAULT_SETTINGS;
   });
 
+  useEffect(() => {
+    applyTheme(settings.themeMode);
+    i18n.changeLanguage(settings.defaultLanguage);
+  }, []);
+
+  const applyTheme = (mode) => {
+    const root = document.documentElement;
+
+    if (mode === "dark") {
+      root.setAttribute("data-theme", "dark");
+    } else if (mode === "light") {
+      root.setAttribute("data-theme", "light");
+    } else {
+      const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      root.setAttribute("data-theme", dark ? "dark" : "light");
+    }
+
+    localStorage.setItem("theme", mode);
+  };
+
   const handleChange = (e) => {
-    setSettings({
+    const { name, value } = e.target;
+
+    const updated = {
       ...settings,
-      [e.target.name]: e.target.value,
-    });
+      [name]: value,
+    };
+
+    setSettings(updated);
+
+    if (name === "themeMode") {
+      applyTheme(value);
+      toast.success("Theme updated");
+    }
+
+    if (name === "defaultLanguage") {
+      i18n.changeLanguage(value);
+      toast.success("Language updated");
+    }
+
+    localStorage.setItem("policeAppSettings", JSON.stringify(updated));
   };
 
   const handleSave = (e) => {
     e.preventDefault();
+    localStorage.setItem("policeAppSettings", JSON.stringify(settings));
     toast.success("Settings saved successfully");
   };
 
@@ -84,11 +128,7 @@ function Settings() {
             <div className="form-grid">
               <div className="form-group full-width">
                 <label>System Name</label>
-                <input
-                  name="systemName"
-                  value={settings.systemName}
-                  onChange={handleChange}
-                />
+                <input name="systemName" value={settings.systemName} onChange={handleChange} />
               </div>
 
               <div className="form-group">
@@ -123,14 +163,10 @@ function Settings() {
               <Languages size={22} />
               <div>
                 <h4>Language</h4>
-                <select
-                  name="defaultLanguage"
-                  value={settings.defaultLanguage}
-                  onChange={handleChange}
-                >
-                  <option>Marathi</option>
-                  <option>Hindi</option>
-                  <option>English</option>
+                <select name="defaultLanguage" value={settings.defaultLanguage} onChange={handleChange}>
+                  <option value="mr">मराठी</option>
+                  <option value="hi">हिंदी</option>
+                  <option value="en">English</option>
                 </select>
               </div>
             </div>
@@ -140,9 +176,9 @@ function Settings() {
               <div>
                 <h4>Theme Mode</h4>
                 <select name="themeMode" value={settings.themeMode} onChange={handleChange}>
-                  <option>Light</option>
-                  <option>Dark</option>
-                  <option>System Default</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                  <option value="system">System Default</option>
                 </select>
               </div>
             </div>
@@ -151,11 +187,7 @@ function Settings() {
               <Bell size={22} />
               <div>
                 <h4>Notifications</h4>
-                <select
-                  name="enableNotifications"
-                  value={settings.enableNotifications}
-                  onChange={handleChange}
-                >
+                <select name="enableNotifications" value={settings.enableNotifications} onChange={handleChange}>
                   <option>Yes</option>
                   <option>No</option>
                 </select>
@@ -166,11 +198,7 @@ function Settings() {
               <MapPin size={22} />
               <div>
                 <h4>GPS Tracking</h4>
-                <select
-                  name="enableGpsTracking"
-                  value={settings.enableGpsTracking}
-                  onChange={handleChange}
-                >
+                <select name="enableGpsTracking" value={settings.enableGpsTracking} onChange={handleChange}>
                   <option>Yes</option>
                   <option>No</option>
                 </select>
@@ -181,11 +209,7 @@ function Settings() {
               <Database size={22} />
               <div>
                 <h4>Duplicate Check</h4>
-                <select
-                  name="enableDuplicateCheck"
-                  value={settings.enableDuplicateCheck}
-                  onChange={handleChange}
-                >
+                <select name="enableDuplicateCheck" value={settings.enableDuplicateCheck} onChange={handleChange}>
                   <option>Yes</option>
                   <option>No</option>
                 </select>
@@ -196,11 +220,7 @@ function Settings() {
               <Lock size={22} />
               <div>
                 <h4>Audit Logs</h4>
-                <select
-                  name="enableAuditLogs"
-                  value={settings.enableAuditLogs}
-                  onChange={handleChange}
-                >
+                <select name="enableAuditLogs" value={settings.enableAuditLogs} onChange={handleChange}>
                   <option>Yes</option>
                   <option>No</option>
                 </select>
@@ -215,25 +235,10 @@ function Settings() {
             </div>
 
             <div className="settings-security-list">
-              <div>
-                <b>JWT Login Security</b>
-                <span>Enabled</span>
-              </div>
-
-              <div>
-                <b>Role Based Access</b>
-                <span>Enabled</span>
-              </div>
-
-              <div>
-                <b>Password Encryption</b>
-                <span>Enabled</span>
-              </div>
-
-              <div>
-                <b>Protected Routes</b>
-                <span>Enabled</span>
-              </div>
+              <div><b>JWT Login Security</b><span>Enabled</span></div>
+              <div><b>Role Based Access</b><span>Enabled</span></div>
+              <div><b>Password Encryption</b><span>Enabled</span></div>
+              <div><b>Protected Routes</b><span>Enabled</span></div>
             </div>
           </section>
 

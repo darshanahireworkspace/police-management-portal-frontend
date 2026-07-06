@@ -5918,3 +5918,322 @@ border-radius:14px;
   background: #eff6ff !important;
   transform: translateY(-2px);
 }
+
+/* ==========================================
+   PROFESSIONAL RESPONSIVE VIEW MODAL
+========================================== */
+
+.record-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.68);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  z-index: 9999;
+}
+
+.record-modal {
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 30px;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, .28);
+  animation: modalFade .25s ease;
+}
+
+@keyframes modalFade {
+
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+}
+
+.record-modal::-webkit-scrollbar {
+  width: 8px;
+}
+
+.record-modal::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 20px;
+}
+
+.record-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 26px;
+}
+
+.record-modal-header span {
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.record-modal-header h2 {
+  margin-top: 8px;
+  font-size: 30px;
+  color: #0f172a;
+}
+
+.record-modal-header p {
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.record-modal-close {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #f1f5f9;
+  cursor: pointer;
+  transition: .25s;
+}
+
+.record-modal-close:hover {
+  background: #dbeafe;
+  transform: rotate(90deg);
+}
+
+.record-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 18px;
+}
+
+.detail-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 18px;
+}
+
+.detail-card label {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.detail-card span {
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 28px;
+  flex-wrap: wrap;
+}
+
+.modal-btn {
+  border: none;
+  border-radius: 14px;
+  padding: 13px 22px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: .25s;
+  text-decoration: none;
+}
+
+.modal-btn:hover {
+  transform: translateY(-2px);
+}
+
+.btn-map {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.btn-call {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.btn-edit {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.btn-close {
+  background: #0f172a;
+  color: white;
+}
+
+/* ==========================================
+   TABLET
+========================================== */
+
+@media (max-width:900px){
+
+.record-modal{
+padding:22px;
+max-width:95%;
+}
+
+.record-detail-grid{
+grid-template-columns:1fr;
+}
+
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (max-width:600px){
+
+.record-modal-overlay{
+
+padding:12px;
+
+align-items:flex-end;
+
+}
+
+.record-modal{
+
+width:100%;
+
+max-width:100%;
+
+max-height:88vh;
+
+border-radius:24px 24px 0 0;
+
+padding:20px;
+
+}
+
+.record-modal-header{
+
+flex-direction:column;
+
+gap:14px;
+
+}
+
+.record-modal-header h2{
+
+font-size:23px;
+
+}
+
+.record-modal-header p{
+
+font-size:14px;
+
+}
+
+.record-modal-close{
+
+position:absolute;
+
+top:18px;
+
+right:18px;
+
+width:42px;
+
+height:42px;
+
+}
+
+.detail-card{
+
+padding:14px;
+
+border-radius:14px;
+
+}
+
+.detail-card label{
+
+font-size:12px;
+
+}
+
+.detail-card span{
+
+font-size:15px;
+
+}
+
+.modal-buttons{
+
+flex-direction:column;
+
+margin-top:22px;
+
+}
+
+.modal-btn{
+
+width:100%;
+
+justify-content:center;
+
+padding:15px;
+
+font-size:15px;
+
+}
+
+}
+
+.voice-field.voice-active input,
+.voice-field.voice-active textarea {
+  border-color: #0ea5e9 !important;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.16) !important;
+}
+
+.voice-field.voice-active .voice-btn {
+  background: #dc2626 !important;
+  animation: micPulse 1s infinite;
+}
+
+@keyframes micPulse {
+  0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45); }
+  100% { box-shadow: 0 0 0 12px rgba(220, 38, 38, 0); }
+}
+
+.ai-voice-btn.listening {
+  background: linear-gradient(135deg, #dc2626, #f97316) !important;
+  animation: aiVoicePulse 1s infinite;
+}
+
+@keyframes aiVoicePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 18px rgba(220, 38, 38, 0);
+  }
+}
+

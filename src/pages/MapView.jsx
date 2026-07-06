@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import {
   Layers,
@@ -74,6 +74,8 @@ function MapView() {
   const [otherPlaces, setOtherPlaces] = useState([]);
   const [flyPosition, setFlyPosition] = useState(null);
   const [userLocation, setUserLocation] = useState(null);
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const mapRef = useRef(null);
 
   const [showPlaces, setShowPlaces] = useState(true);
   const [showFestivals, setShowFestivals] = useState(true);
@@ -112,40 +114,103 @@ function MapView() {
 
   useEffect(() => {
     const command = localStorage.getItem("mapCommand");
-    const search = localStorage.getItem("mapSearch");
 
     if (command === "highRisk") {
       setRiskFilter("High");
       localStorage.removeItem("mapCommand");
+      toast.success("High risk locations highlighted");
     }
 
-    if (search) {
-      setSearchText(search);
-      localStorage.removeItem("mapSearch");
+    if (command === "mediumRisk") {
+      setRiskFilter("Medium");
+      localStorage.removeItem("mapCommand");
+      toast.success("Medium risk locations highlighted");
+    }
+
+    if (command === "lowRisk") {
+      setRiskFilter("Low");
+      localStorage.removeItem("mapCommand");
+      toast.success("Low risk locations highlighted");
     }
   }, []);
+
+  const getAllMapRecords = () => {
+    const religious = places.map((item) => ({
+      ...item,
+      type: "Religious Place",
+      title: item.place_name,
+      subtitle: `${item.place_type || "-"} • ${item.area || "-"}`,
+    }));
+
+    const festivalRecords = festivals.map((item) => ({
+      ...item,
+      type: "Festival Mandal",
+      title: item.organizer_name || item.mandal_name || item.festival_name,
+      subtitle: `${item.festival_name || "-"} • ${item.area || "-"}`,
+    }));
+
+    const others = otherPlaces.map((item) => ({
+      ...item,
+      type: "Other City Data",
+      title: item.place_name,
+      subtitle: `${item.category || "-"} • ${item.area || "-"}`,
+    }));
+
+    return [...religious, ...festivalRecords, ...others].filter(
+      (item) => item.latitude && item.longitude
+    );
+  };
 
   useEffect(() => {
-    if (!navigator.geolocation) return;
+    const search = localStorage.getItem("mapSearch");
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const pos = [
-          position.coords.latitude,
-          position.coords.longitude,
-        ];
+    if (!search) return;
 
-        setUserLocation(pos);
-        setFlyPosition(pos);
-      },
-      () => toast.error("Please allow location permission"),
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 0,
+    const timer = setTimeout(() => {
+      const q = search.toLowerCase().trim();
+      const allRecords = getAllMapRecords();
+
+      const found = allRecords.find((item) => {
+        const text = `
+          ${item.title || ""}
+          ${item.place_name || ""}
+          ${item.organizer_name || ""}
+          ${item.mandal_name || ""}
+          ${item.festival_name || ""}
+          ${item.category || ""}
+          ${item.area || ""}
+          ${item.address || ""}
+          ${item.mobile || ""}
+          ${item.contact_mobile || ""}
+        `.toLowerCase();
+
+        return text.includes(q);
+      });
+
+      if (found) {
+        const lat = Number(found.latitude);
+        const lng = Number(found.longitude);
+
+        setSelectedRecord(found);
+
+        if (mapRef.current) {
+          mapRef.current.flyTo([lat, lng], 17, {
+            animate: true,
+            duration: 1.4,
+          });
+        }
+
+        toast.success(`${found.title} found`);
+      } else {
+        setSearchText(search);
+        toast.error("Exact record not found. Showing search result.");
       }
-    );
-  }, []);
+
+      localStorage.removeItem("mapSearch");
+    }, 900);
+
+    return () => clearTimeout(timer);
+  }, [places, festivals, otherPlaces]);
 
   const filteredPlaces = useMemo(() => {
     return places.filter((p) => {
@@ -169,6 +234,19 @@ function MapView() {
       );
     });
   }, [festivals, searchText]);
+
+  const filteredOtherPlaces = useMemo(() => {
+    return otherPlaces.filter((o) => {
+      return (
+        !searchText ||
+        o.place_name?.toLowerCase().includes(searchText.toLowerCase()) ||
+        o.category?.toLowerCase().includes(searchText.toLowerCase()) ||
+        o.area?.toLowerCase().includes(searchText.toLowerCase()) ||
+        o.address?.toLowerCase().includes(searchText.toLowerCase()) ||
+        o.mobile?.toLowerCase().includes(searchText.toLowerCase())
+      );
+    });
+  }, [otherPlaces, searchText]);
 
   const handleCurrentLocation = () => {
     navigator.geolocation.getCurrentPosition(
@@ -304,6 +382,7 @@ function MapView() {
             zoom={13}
             scrollWheelZoom={true}
             className="command-leaflet-map"
+            ref={mapRef}
           >
             <TileLayer
               attribution="&copy; OpenStreetMap contributors"
@@ -368,7 +447,7 @@ function MapView() {
               ))}
 
             {showOther &&
-              otherPlaces.map((item) => (
+              filteredOtherPlaces.map((item) => (
                 <Marker
                   key={`other-${item.id}`}
                   position={[Number(item.latitude), Number(item.longitude)]}
@@ -400,6 +479,11 @@ function MapView() {
             <div>
               <b>{filteredFestivals.length}</b>
               <span>Mandals</span>
+            </div>
+
+            <div>
+              <b>{filteredOtherPlaces.length}</b>
+              <span>Other</span>
             </div>
           </div>
 
@@ -448,8 +532,121 @@ function MapView() {
               </div>
             ))}
           </div>
+
+          <h4>Other City Data</h4>
+
+          <div className="gis-record-list">
+            {filteredOtherPlaces.map((item) => (
+              <div
+                className="gis-record-card other"
+                key={`side-other-${item.id}`}
+                onClick={() => {
+                  setFlyPosition([
+                    Number(item.latitude),
+                    Number(item.longitude),
+                  ]);
+                  setSelectedRecord({
+                    ...item,
+                    type: "Other City Data",
+                    title: item.place_name,
+                    subtitle: `${item.category || "-"} • ${item.area || "-"}`,
+                  });
+                }}
+              >
+                <Layers size={18} />
+                <div>
+                  <b>{item.place_name}</b>
+                  <p>{item.category} • {item.area || "-"}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         </aside>
       </div>
+
+      {selectedRecord && (
+        <div
+          className="record-modal-overlay"
+          onClick={() => setSelectedRecord(null)}
+        >
+          <div className="record-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="record-modal-header">
+              <div>
+                <span>{selectedRecord.type}</span>
+                <h2>{selectedRecord.title}</h2>
+                <p>{selectedRecord.subtitle}</p>
+              </div>
+
+              <button
+                className="record-modal-close"
+                onClick={() => setSelectedRecord(null)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="record-detail-grid">
+              <div className="detail-card">
+                <label>Name</label>
+                <span>{selectedRecord.title || "-"}</span>
+              </div>
+
+              <div className="detail-card">
+                <label>Type</label>
+                <span>{selectedRecord.type || "-"}</span>
+              </div>
+
+              <div className="detail-card">
+                <label>Area</label>
+                <span>{selectedRecord.area || "-"}</span>
+              </div>
+
+              <div className="detail-card">
+                <label>Mobile</label>
+                <span>
+                  {selectedRecord.mobile ||
+                    selectedRecord.contact_mobile ||
+                    selectedRecord.president_mobile ||
+                    "-"}
+                </span>
+              </div>
+
+              <div className="detail-card">
+                <label>Address</label>
+                <span>{selectedRecord.address || "-"}</span>
+              </div>
+
+              <div className="detail-card">
+                <label>Latitude</label>
+                <span>{selectedRecord.latitude || "-"}</span>
+              </div>
+
+              <div className="detail-card">
+                <label>Longitude</label>
+                <span>{selectedRecord.longitude || "-"}</span>
+              </div>
+            </div>
+
+            <div className="modal-buttons">
+              <a
+                className="modal-btn btn-map"
+                href={`https://www.google.com/maps?q=${selectedRecord.latitude},${selectedRecord.longitude}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open Google Map
+              </a>
+
+              <button
+                className="modal-btn btn-close"
+                onClick={() => setSelectedRecord(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
