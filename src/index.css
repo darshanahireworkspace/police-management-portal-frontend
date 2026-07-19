@@ -7223,3 +7223,319 @@ textarea{
   font-size:16px;
 
 }
+
+/* =========================================================
+   FINAL iPHONE 13 PRO PWA FIX
+   ADD AT THE VERY END OF index.css
+========================================================= */
+
+html {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  background: #eef4fb;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0 !important;
+  overflow-x: hidden;
+  background: #eef4fb;
+}
+
+#root {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+.app-layout {
+  width: 100%;
+  min-height: 100dvh;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow-x: hidden;
+}
+
+.main-content {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+/* iPhone PWA standalone safe area */
+@media (display-mode: standalone) {
+  body {
+    min-height: 100dvh;
+  }
+}
+
+/* =========================================================
+   iPHONE MOBILE TOPBAR FIX
+========================================================= */
+
+@media (max-width: 650px) {
+  .topbar {
+    width: 100% !important;
+
+    height: auto !important;
+    min-height: calc(76px + env(safe-area-inset-top)) !important;
+
+    padding-top: calc(10px + env(safe-area-inset-top)) !important;
+    padding-right: 12px !important;
+    padding-bottom: 10px !important;
+    padding-left: 12px !important;
+
+    display: grid !important;
+    grid-template-columns: 44px minmax(0, 1fr) auto !important;
+    align-items: center !important;
+    gap: 9px !important;
+
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 1000 !important;
+
+    background: #ffffff !important;
+    border-radius: 0 0 24px 24px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.1) !important;
+
+    box-sizing: border-box !important;
+  }
+
+  .hamburger-btn {
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 14px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .topbar-title {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .topbar-kicker {
+    display: block !important;
+    margin: 0 0 4px !important;
+    font-size: 9px !important;
+    line-height: 1 !important;
+    letter-spacing: 0.07em !important;
+    white-space: nowrap !important;
+  }
+
+  .topbar-title h1 {
+    max-width: 100% !important;
+    margin: 0 !important;
+    font-size: 16px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .topbar-title p {
+    display: block !important;
+    max-width: 100% !important;
+    margin: 4px 0 0 !important;
+    font-size: 10px !important;
+    line-height: 1 !important;
+    color: #64748b !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .topbar-actions {
+    width: auto !important;
+    min-width: 76px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-shrink: 0 !important;
+  }
+
+  .language-pill {
+    width: 76px !important;
+    min-width: 76px !important;
+    height: 40px !important;
+    padding: 0 5px !important;
+    border-radius: 13px !important;
+    gap: 2px !important;
+  }
+
+  .language-pill svg {
+    display: none !important;
+  }
+
+  .language-pill select {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 38px !important;
+    padding: 0 4px !important;
+    font-size: 11px !important;
+    text-align: center !important;
+  }
+
+  /* Main page spacing */
+  .page-content {
+    width: 100% !important;
+    padding: 14px 14px
+      calc(105px + env(safe-area-inset-bottom)) !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Dashboard hero */
+  .dashboard-hero {
+    width: 100% !important;
+    margin: 14px 0 !important;
+    padding: 20px 18px !important;
+    border-radius: 24px !important;
+    box-sizing: border-box !important;
+  }
+
+  .dashboard-hero h2 {
+    font-size: 22px !important;
+    line-height: 1.25 !important;
+  }
+
+  .dashboard-hero p {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Search and filter */
+  .dashboard-action-row {
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .dashboard-action-row > * {
+    max-width: 100% !important;
+  }
+
+  .table-search,
+  .dashboard-filter-select,
+  .secondary-btn {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Horizontal dashboard cards */
+  .stats-grid {
+    width: calc(100% + 14px) !important;
+    margin-right: -14px !important;
+    padding: 5px 14px 14px 0 !important;
+    display: flex !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-padding-left: 0 !important;
+    scroll-snap-type: x proximity !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .stats-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .stat-card {
+    flex: 0 0 145px !important;
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+    min-height: 108px !important;
+    height: auto !important;
+    padding: 14px !important;
+    border-radius: 20px !important;
+    scroll-snap-align: start !important;
+    box-sizing: border-box !important;
+  }
+
+  .stat-card:last-child {
+    margin-right: 14px !important;
+  }
+
+  /* Panels */
+  .panel-card,
+  .form-section,
+  .data-table-card,
+  .map-card,
+  .map-side-panel {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Map */
+  .leaflet-map {
+    width: 100% !important;
+    height: 430px !important;
+    min-height: 430px !important;
+  }
+
+  /* Sidebar safe area */
+  .sidebar {
+    top: 0 !important;
+    height: 100dvh !important;
+    padding-top: calc(20px + env(safe-area-inset-top)) !important;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* Bottom navigation safe area */
+  .mobile-bottom-nav,
+  .bottom-navigation,
+  .bottom-nav {
+    bottom: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    min-height: calc(76px + env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent elements exceeding screen width */
+  input,
+  select,
+  textarea,
+  button,
+  img {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Exact iPhone 13 Pro width */
+@media only screen and (min-width: 385px) and (max-width: 395px) {
+  .page-content {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+
+  .topbar {
+    grid-template-columns: 42px minmax(0, 1fr) 74px !important;
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+    gap: 8px !important;
+  }
+
+  .topbar-title h1 {
+    font-size: 15px !important;
+  }
+
+  .language-pill {
+    width: 74px !important;
+    min-width: 74px !important;
+  }
+}
