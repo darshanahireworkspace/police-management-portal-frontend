@@ -1,7 +1,7 @@
 import API from "./axios";
 
-export const createOtherPlace = (data) => {
-  return API.post("/other-places", data);
+export const createOtherPlace = (formData) => {
+  return API.post("/other-places", formData);
 };
 
 export const getOtherPlaces = () => {
@@ -12,8 +12,8 @@ export const getSingleOtherPlace = (id) => {
   return API.get(`/other-places/${id}`);
 };
 
-export const updateOtherPlace = (id, data) => {
-  return API.put(`/other-places/${id}`, data);
+export const updateOtherPlace = (id, formData) => {
+  return API.put(`/other-places/${id}`, formData);
 };
 
 export const deleteOtherPlace = (id) => {

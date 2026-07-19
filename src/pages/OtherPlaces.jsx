@@ -1,5 +1,17 @@
-import { useEffect, useState } from "react";
-import { Plus, Eye, Pencil, Trash2, X, Phone, MapPin, Store, Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  Plus,
+  Eye,
+  Pencil,
+  Trash2,
+  X,
+  Phone,
+  MapPin,
+  Store,
+  Search,
+  ImagePlus,
+  Upload,
+} from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -14,6 +26,20 @@ import {
 import VoiceField from "../components/common/VoiceField";
 import { addToOfflineQueue } from "../services/offlineQueue";
 
+const INITIAL_FORM = {
+  place_name: "",
+  category: "Hotel",
+  owner_name: "",
+  mobile: "",
+  address: "",
+  area: "",
+  latitude: "",
+  longitude: "",
+  google_map_link: "",
+  notes: "",
+  photo: "",
+};
+
 function OtherPlaces() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -23,32 +49,52 @@ function OtherPlaces() {
   const [search, setSearch] = useState("");
   const [locationLoading, setLocationLoading] = useState(false);
   const [selectedOther, setSelectedOther] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    place_name: "",
-    category: "Hotel",
-    owner_name: "",
-    mobile: "",
-    address: "",
-    area: "",
-    latitude: "",
-    longitude: "",
-    google_map_link: "",
-    notes: "",
-  });
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState("");
+
+  const getPhotoUrl = (photo) => {
+    if (!photo) return "";
+
+    if (
+      photo.startsWith("http://") ||
+      photo.startsWith("https://") ||
+      photo.startsWith("blob:") ||
+      photo.startsWith("data:")
+    ) {
+      return photo;
+    }
+
+    const backendBase = (import.meta.env.VITE_API_URL || "").replace(
+      /\/api\/?$/,
+      ""
+    );
+
+    const cleanPhoto = photo
+      .replace(/^\/+/, "")
+      .replace(/^uploads\//, "");
+
+    return `${backendBase}/uploads/${cleanPhoto}`;
+  };
 
   const loadPlaces = async () => {
     try {
       const res = await getOtherPlaces();
       setPlaces(res.data.data || []);
-    } catch {
+    } catch (error) {
+      console.error("Other places load error:", error);
       toast.error("Failed to load other places");
     }
   };
 
   useEffect(() => {
     loadPlaces();
-    detectLocation();
+
+    if (!isEditMode) {
+      detectLocation();
+    }
   }, []);
 
   useEffect(() => {
@@ -58,6 +104,8 @@ function OtherPlaces() {
       try {
         const res = await getSingleOtherPlace(id);
         const data = res.data.data;
+
+        const existingPhoto = data.photo || data.image || "";
 
         setForm({
           place_name: data.place_name || "",
@@ -70,8 +118,12 @@ function OtherPlaces() {
           longitude: data.longitude || "",
           google_map_link: data.google_map_link || "",
           notes: data.notes || "",
+          photo: existingPhoto,
         });
-      } catch {
+
+        setPhotoPreview(getPhotoUrl(existingPhoto));
+      } catch (error) {
+        console.error("Single other place error:", error);
         toast.error("Failed to load record");
       }
     };
@@ -79,11 +131,66 @@ function OtherPlaces() {
     loadSingle();
   }, [id]);
 
+  useEffect(() => {
+    return () => {
+      if (photoPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(photoPreview);
+      }
+    };
+  }, [photoPreview]);
+
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setForm((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  };
+
+  const handlePhotoChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Only JPG, PNG or WEBP photo is allowed");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Photo size must be below 5 MB");
+      e.target.value = "";
+      return;
+    }
+
+    if (photoPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(photoPreview);
+    }
+
+    setPhotoFile(file);
+    setPhotoPreview(URL.createObjectURL(file));
+  };
+
+  const removeSelectedPhoto = () => {
+    if (photoPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(photoPreview);
+    }
+
+    setPhotoFile(null);
+    setPhotoPreview("");
+    setForm((previous) => ({
+      ...previous,
+      photo: "",
+    }));
   };
 
   const reverseGeocode = async (lat, lng) => {
@@ -95,8 +202,8 @@ function OtherPlaces() {
       const data = await res.json();
       const address = data.address || {};
 
-      setForm((prev) => ({
-        ...prev,
+      setForm((previous) => ({
+        ...previous,
         address: data.display_name || "",
         area:
           address.suburb ||
@@ -104,16 +211,18 @@ function OtherPlaces() {
           address.road ||
           address.village ||
           address.town ||
+          address.city ||
           "",
       }));
-    } catch {
+    } catch (error) {
+      console.error("Reverse geocode error:", error);
       toast.error("Address auto-fill failed");
     }
   };
 
   const detectLocation = () => {
     if (!navigator.geolocation) {
-      toast.error("Location not supported");
+      toast.error("Location is not supported on this device");
       return;
     }
 
@@ -124,129 +233,218 @@ function OtherPlaces() {
         const lat = position.coords.latitude.toFixed(7);
         const lng = position.coords.longitude.toFixed(7);
 
-        setForm((prev) => ({
-          ...prev,
+        setForm((previous) => ({
+          ...previous,
           latitude: lat,
           longitude: lng,
           google_map_link: `https://www.google.com/maps?q=${lat},${lng}`,
         }));
 
         await reverseGeocode(lat, lng);
+
         setLocationLoading(false);
+        toast.success("Current location detected");
       },
-      () => {
-        toast.error("Please allow location permission");
+      (error) => {
+        console.error("Location error:", error);
+
+        if (error.code === error.PERMISSION_DENIED) {
+          toast.error("Please allow location permission");
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          toast.error("Current location is unavailable");
+        } else {
+          toast.error("Location detection timed out");
+        }
+
         setLocationLoading(false);
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
+        timeout: 20000,
         maximumAge: 0,
       }
     );
+  };
+
+  const createFormData = () => {
+    const formData = new FormData();
+
+    Object.entries(form).forEach(([key, value]) => {
+      if (key !== "photo") {
+        formData.append(key, value ?? "");
+      }
+    });
+
+    if (photoFile) {
+      formData.append("photo", photoFile);
+    }
+
+    if (isEditMode) {
+      formData.append("existing_photo", form.photo || "");
+    }
+
+    return formData;
+  };
+
+  const resetForm = () => {
+    if (photoPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(photoPreview);
+    }
+
+    setForm({
+      ...INITIAL_FORM,
+      latitude: form.latitude,
+      longitude: form.longitude,
+      google_map_link: form.google_map_link,
+      address: form.address,
+      area: form.area,
+    });
+
+    setPhotoFile(null);
+    setPhotoPreview("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.place_name.trim()) {
-      toast.error("Name required");
+      toast.error("Name is required");
       return;
     }
 
     if (!form.category.trim()) {
-      toast.error("Category required");
+      toast.error("Category is required");
+      return;
+    }
+
+    if (!form.latitude || !form.longitude) {
+      toast.error("Please detect the current location");
       return;
     }
 
     try {
+      setSubmitting(true);
+
+      const payload = createFormData();
+
       if (isEditMode) {
-        await updateOtherPlace(id, form);
+        await updateOtherPlace(id, payload);
+
         toast.success("Other place updated successfully");
         navigate("/other-places");
       } else {
-        await createOtherPlace(form);
-        toast.success("Other city place added");
+        await createOtherPlace(payload);
 
-        setForm({
-          place_name: "",
-          category: "Hotel",
-          owner_name: "",
-          mobile: "",
-          address: "",
-          area: "",
-          latitude: form.latitude,
-          longitude: form.longitude,
-          google_map_link: form.google_map_link,
-          notes: "",
-        });
-
-        loadPlaces();
+        toast.success("Other city place added successfully");
+        resetForm();
+        await loadPlaces();
       }
-    } catch {
+    } catch (error) {
+      console.error("Other place save error:", error);
+
       if (!navigator.onLine) {
+        const offlineData = {
+          ...form,
+          photo: "",
+        };
+
         await addToOfflineQueue({
           method: "POST",
           url: "/other-places",
-          data: form,
+          data: offlineData,
         });
 
-        toast.success("Saved offline. It will sync when internet returns.");
+        toast.success(
+          photoFile
+            ? "Details saved offline. Photo requires internet and was not queued."
+            : "Saved offline. It will sync when internet returns."
+        );
+
         return;
       }
 
-      toast.error("Failed to save");
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to save other place"
+      );
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Delete this record?")) return;
+  const handleDelete = async (recordId) => {
+    if (!window.confirm("Delete this record permanently?")) return;
 
     try {
-      await deleteOtherPlace(id);
-      toast.success("Deleted");
-      loadPlaces();
-    } catch {
+      await deleteOtherPlace(recordId);
+      toast.success("Record deleted");
+      setSelectedOther(null);
+      await loadPlaces();
+    } catch (error) {
+      console.error("Other place delete error:", error);
       toast.error("Delete failed");
     }
   };
 
-  const filteredPlaces = places.filter((item) => {
-    const q = search.toLowerCase();
+  const filteredPlaces = useMemo(() => {
+    const q = search.toLowerCase().trim();
 
-    return (
-      item.place_name?.toLowerCase().includes(q) ||
-      item.category?.toLowerCase().includes(q) ||
-      item.area?.toLowerCase().includes(q) ||
-      item.mobile?.toLowerCase().includes(q)
-    );
-  });
+    if (!q) return places;
+
+    return places.filter((item) => {
+      const searchableText = `
+        ${item.place_name || ""}
+        ${item.category || ""}
+        ${item.owner_name || ""}
+        ${item.area || ""}
+        ${item.mobile || ""}
+        ${item.address || ""}
+      `.toLowerCase();
+
+      return searchableText.includes(q);
+    });
+  }, [places, search]);
 
   return (
-    <div>
+    <div className="other-places-page">
       <div className="page-header">
         <div>
           <h2 className="page-title">Other City Data</h2>
+
           <p className="page-subtitle">
-            Store hotels, medicals, shops, amruttulya, mobile shops and other city information.
+            Store hotels, medicals, shops, Amruttulya, mobile shops and other
+            important city information.
           </p>
         </div>
 
-        <button className="secondary-btn" type="button" onClick={detectLocation}>
+        <button
+          className="secondary-btn"
+          type="button"
+          onClick={detectLocation}
+          disabled={locationLoading}
+        >
           <MapPin size={18} />
+
           {locationLoading ? "Detecting..." : "Detect Location"}
         </button>
       </div>
 
-      <form className="form-section" onSubmit={handleSubmit}>
+      <form
+        className="form-section other-place-form"
+        onSubmit={handleSubmit}
+        encType="multipart/form-data"
+      >
         <div className="section-title">
           <Store size={20} />
+
           <h3>{isEditMode ? "Edit Other Place" : "Add Other Place"}</h3>
         </div>
 
         <div className="form-grid">
           <div className="form-group">
             <label>Name</label>
+
             <VoiceField
               name="place_name"
               value={form.place_name}
@@ -257,7 +455,12 @@ function OtherPlaces() {
 
           <div className="form-group">
             <label>Category</label>
-            <select name="category" value={form.category} onChange={handleChange}>
+
+            <select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+            >
               <option>Amruttulya</option>
               <option>Hotel</option>
               <option>Medical</option>
@@ -274,6 +477,7 @@ function OtherPlaces() {
 
           <div className="form-group">
             <label>Owner / Contact Person</label>
+
             <VoiceField
               name="owner_name"
               value={form.owner_name}
@@ -284,7 +488,9 @@ function OtherPlaces() {
 
           <div className="form-group">
             <label>Mobile</label>
+
             <VoiceField
+              type="tel"
               name="mobile"
               value={form.mobile}
               onChange={handleChange}
@@ -294,7 +500,9 @@ function OtherPlaces() {
 
           <div className="form-group full-width">
             <label>Address</label>
+
             <VoiceField
+              textarea
               name="address"
               value={form.address}
               onChange={handleChange}
@@ -304,33 +512,98 @@ function OtherPlaces() {
 
           <div className="form-group">
             <label>Area</label>
+
             <VoiceField
               name="area"
               value={form.area}
               onChange={handleChange}
+              placeholder="Area or locality"
             />
           </div>
 
           <div className="form-group">
             <label>Latitude</label>
+
             <VoiceField
               name="latitude"
               value={form.latitude}
               onChange={handleChange}
+              placeholder="Latitude"
             />
           </div>
 
           <div className="form-group">
             <label>Longitude</label>
+
             <VoiceField
               name="longitude"
               value={form.longitude}
               onChange={handleChange}
+              placeholder="Longitude"
             />
           </div>
 
           <div className="form-group full-width">
+            <label>Shop / Place Photo</label>
+
+            <div className="photo-upload-card">
+              {!photoPreview ? (
+                <label className="photo-upload-empty">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handlePhotoChange}
+                    hidden
+                  />
+
+                  <div className="photo-upload-icon">
+                    <ImagePlus size={28} />
+                  </div>
+
+                  <div>
+                    <b>Upload place photo</b>
+                    <span>JPG, PNG or WEBP — maximum 5 MB</span>
+                  </div>
+
+                  <div className="photo-upload-action">
+                    <Upload size={17} />
+                    Choose Photo
+                  </div>
+                </label>
+              ) : (
+                <div className="photo-preview-box">
+                  <img src={photoPreview} alt="Other place preview" />
+
+                  <div className="photo-preview-actions">
+                    <label className="photo-change-btn">
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        onChange={handlePhotoChange}
+                        hidden
+                      />
+
+                      <Upload size={16} />
+                      Change Photo
+                    </label>
+
+                    <button
+                      type="button"
+                      className="photo-remove-btn"
+                      onClick={removeSelectedPhoto}
+                    >
+                      <Trash2 size={16} />
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="form-group full-width">
             <label>Notes</label>
+
             <VoiceField
               textarea
               name="notes"
@@ -341,15 +614,27 @@ function OtherPlaces() {
           </div>
         </div>
 
-        <button className="primary-btn" type="submit">
+        <button
+          className="primary-btn"
+          type="submit"
+          disabled={submitting}
+        >
           <Plus size={18} />
-          {isEditMode ? "Update Other Place" : "Save Other Place"}
+
+          {submitting
+            ? isEditMode
+              ? "Updating..."
+              : "Saving..."
+            : isEditMode
+              ? "Update Other Place"
+              : "Save Other Place"}
         </button>
       </form>
 
       <div className="table-toolbar">
         <div className="table-search">
           <Search size={18} />
+
           <VoiceField
             name="search"
             value={search}
@@ -364,6 +649,7 @@ function OtherPlaces() {
           <table className="professional-table">
             <thead>
               <tr>
+                <th>Photo</th>
                 <th>Name</th>
                 <th>Category</th>
                 <th>Area</th>
@@ -376,36 +662,67 @@ function OtherPlaces() {
             <tbody>
               {filteredPlaces.length === 0 ? (
                 <tr>
-                  <td colSpan="6">No records found.</td>
+                  <td colSpan="7">No records found.</td>
                 </tr>
               ) : (
-                filteredPlaces.map((item) => (
-                  <tr key={item.id}>
-                    <td>{item.place_name}</td>
-                    <td>{item.category}</td>
-                    <td>{item.area || "-"}</td>
-                    <td>{item.mobile || "-"}</td>
-                    <td>{item.address || "-"}</td>
-                    <td>
-                      <div className="action-group">
-                        <button onClick={() => setSelectedOther(item)}>
-                          <Eye size={16} />
-                        </button>
+                filteredPlaces.map((item) => {
+                  const itemPhoto = getPhotoUrl(item.photo || item.image);
 
-                        <button onClick={() => navigate(`/edit-other-place/${item.id}`)}>
-                          <Pencil size={16} />
-                        </button>
+                  return (
+                    <tr key={item.id}>
+                      <td>
+                        {itemPhoto ? (
+                          <img
+                            className="other-table-photo"
+                            src={itemPhoto}
+                            alt={item.place_name}
+                          />
+                        ) : (
+                          <div className="other-table-photo-placeholder">
+                            <Store size={18} />
+                          </div>
+                        )}
+                      </td>
 
-                        <button
-                          className="danger-action"
-                          onClick={() => handleDelete(item.id)}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td>{item.place_name}</td>
+                      <td>{item.category}</td>
+                      <td>{item.area || "-"}</td>
+                      <td>{item.mobile || "-"}</td>
+                      <td>{item.address || "-"}</td>
+
+                      <td>
+                        <div className="action-group">
+                          <button
+                            type="button"
+                            title="View details"
+                            onClick={() => setSelectedOther(item)}
+                          >
+                            <Eye size={16} />
+                          </button>
+
+                          <button
+                            type="button"
+                            title="Edit record"
+                            onClick={() =>
+                              navigate(`/edit-other-place/${item.id}`)
+                            }
+                          >
+                            <Pencil size={16} />
+                          </button>
+
+                          <button
+                            type="button"
+                            title="Delete record"
+                            className="danger-action"
+                            onClick={() => handleDelete(item.id)}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -413,19 +730,43 @@ function OtherPlaces() {
       </div>
 
       {selectedOther && (
-        <div className="record-modal-overlay" onClick={() => setSelectedOther(null)}>
-          <div className="record-modal" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="record-modal-overlay"
+          onClick={() => setSelectedOther(null)}
+        >
+          <div
+            className="record-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="record-modal-header">
               <div>
                 <span>Other City Data</span>
                 <h2>{selectedOther.place_name}</h2>
-                <p>{selectedOther.category} • {selectedOther.area || "-"}</p>
+
+                <p>
+                  {selectedOther.category} • {selectedOther.area || "-"}
+                </p>
               </div>
 
-              <button className="record-modal-close" onClick={() => setSelectedOther(null)}>
+              <button
+                type="button"
+                className="record-modal-close"
+                onClick={() => setSelectedOther(null)}
+              >
                 <X size={20} />
               </button>
             </div>
+
+            {(selectedOther.photo || selectedOther.image) && (
+              <div className="record-photo-banner">
+                <img
+                  src={getPhotoUrl(
+                    selectedOther.photo || selectedOther.image
+                  )}
+                  alt={selectedOther.place_name}
+                />
+              </div>
+            )}
 
             <div className="record-detail-grid">
               <div className="detail-card">
@@ -467,6 +808,11 @@ function OtherPlaces() {
                 <label>Longitude</label>
                 <span>{selectedOther.longitude || "-"}</span>
               </div>
+
+              <div className="detail-card full-detail-card">
+                <label>Notes</label>
+                <span>{selectedOther.notes || "-"}</span>
+              </div>
             </div>
 
             <div className="modal-buttons">
@@ -475,6 +821,7 @@ function OtherPlaces() {
                   className="modal-btn btn-map"
                   href={selectedOther.google_map_link}
                   target="_blank"
+                  rel="noreferrer"
                 >
                   <MapPin size={17} />
                   Open Map
@@ -482,21 +829,31 @@ function OtherPlaces() {
               )}
 
               {selectedOther.mobile && (
-                <a className="modal-btn btn-call" href={`tel:${selectedOther.mobile}`}>
+                <a
+                  className="modal-btn btn-call"
+                  href={`tel:${selectedOther.mobile}`}
+                >
                   <Phone size={17} />
                   Call
                 </a>
               )}
 
               <button
+                type="button"
                 className="modal-btn btn-edit"
-                onClick={() => navigate(`/edit-other-place/${selectedOther.id}`)}
+                onClick={() =>
+                  navigate(`/edit-other-place/${selectedOther.id}`)
+                }
               >
                 <Pencil size={17} />
                 Edit
               </button>
 
-              <button className="modal-btn btn-close" onClick={() => setSelectedOther(null)}>
+              <button
+                type="button"
+                className="modal-btn btn-close"
+                onClick={() => setSelectedOther(null)}
+              >
                 Close
               </button>
             </div>
