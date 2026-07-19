@@ -7060,3 +7060,166 @@ opacity:.3;
     max-height: 230px;
   }
 }
+
+/* ===========================================================
+   iPHONE 13 / 14 / 15 PRO PWA RESPONSIVE FIX
+   Add at the VERY END of index.css
+=========================================================== */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  overscroll-behavior-y: contain;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* PWA Safe Area */
+@supports (padding: max(0px)) {
+
+  body,
+  .app-layout {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  .topbar {
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+  }
+
+  .sidebar {
+    padding-top: max(20px, env(safe-area-inset-top));
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+  }
+
+  .page-content {
+    padding-bottom: max(18px, env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* ===========================================================
+   iPhone 13 Pro / 14 Pro / 15 Pro
+=========================================================== */
+
+@media only screen
+and (max-width:430px)
+and (min-width:375px){
+
+  body{
+    font-size:15px;
+  }
+
+  .page-content{
+    padding:14px !important;
+  }
+
+  .topbar{
+    min-height:82px !important;
+    padding:16px !important;
+  }
+
+  .topbar-title h1{
+    font-size:18px !important;
+    line-height:1.2;
+  }
+
+  .page-title{
+    font-size:22px !important;
+  }
+
+  .dashboard-hero{
+    border-radius:20px;
+    padding:18px !important;
+  }
+
+  .stats-grid{
+    gap:12px !important;
+  }
+
+  .stat-card{
+    min-width:155px !important;
+    height:110px !important;
+  }
+
+  .panel-card,
+  .form-section,
+  .data-table-card,
+  .map-card,
+  .map-side-panel{
+    border-radius:18px !important;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea{
+    min-height:46px !important;
+    font-size:14px !important;
+  }
+
+  .primary-btn,
+  .secondary-btn,
+  .cancel-btn{
+    min-height:46px !important;
+    border-radius:14px !important;
+  }
+
+  .table-responsive{
+    border-radius:18px;
+  }
+
+  .professional-table{
+    min-width:760px !important;
+  }
+
+  .leaflet-map{
+    height:55vh !important;
+    min-height:430px !important;
+  }
+
+  .command-leaflet-map{
+    min-height:520px !important;
+  }
+
+  .sidebar{
+    width:290px !important;
+  }
+
+  .search-box{
+    display:none !important;
+  }
+
+  img{
+    max-width:100%;
+    height:auto;
+  }
+
+}
+
+/* Smooth scrolling */
+
+*{
+  scroll-behavior:smooth;
+}
+
+/* Better touch targets */
+
+button,
+a,
+input,
+select,
+textarea{
+
+  touch-action:manipulation;
+
+}
+
+/* Prevent zoom on input focus */
+
+input,
+select,
+textarea{
+
+  font-size:16px;
+
+}
